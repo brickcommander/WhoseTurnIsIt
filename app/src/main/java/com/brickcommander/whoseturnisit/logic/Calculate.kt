@@ -5,7 +5,7 @@ import GitHubJsonHandler
 
 class Calculate {
     // HardCoded, needs to be removed later
-    private val githubToken = "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"
+    private val githubToken = "<token>"
     private val repoOwner = "brickcommander"
     private val repoName = "Android-App"
     private val filePath = "data.json"
