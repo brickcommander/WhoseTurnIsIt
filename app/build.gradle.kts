@@ -1,3 +1,6 @@
+import java.util.Locale
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -19,6 +22,26 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        // Load secrets.properties file
+        val secretsPropertiesFile = rootProject.file("app/src/main/res/secrets.properties")
+        if (secretsPropertiesFile.exists()) {
+            val secretsProperties = Properties()
+            secretsProperties.load(secretsPropertiesFile.inputStream())
+
+            // Iterate over each property and add it as a buildConfigField
+            secretsProperties.forEach { key, value ->
+                buildConfigField("String", key.toString().uppercase(Locale.getDefault()), "\"$value\"")
+            }
+        }
+    }
+
+    buildFeatures {
+        buildConfig = true
+    }
+
+    viewBinding {
+        enable = true
     }
 
     buildTypes {
@@ -60,6 +83,10 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
+    implementation(libs.androidx.activity)
+    implementation(libs.androidx.constraintlayout)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
