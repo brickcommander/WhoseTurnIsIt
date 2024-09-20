@@ -21,31 +21,12 @@ class Calculate {
         const val TAG = "Calculate"
     }
 
+    // Synchronous function to fetch JSON
     fun updateToLatestDB(): List<Person>? {
         Log.i(TAG, "updateToLatestDB()")
-        var persons: List<Person>? = null
-        Thread {
-            persons = handler.fetchJsonFromGitHub()
 
-            if (persons != null) {
-                println("Fetched persons:")
-                persons!!.forEach { person ->
-                    println(person.toString())
-                }
-
-//                // Example of modifying the list
-//                persons.forEach { person ->
-//                    person.increaseScore(9)
-//                }
-//
-//                // Update the JSON file on GitHub
-//                handler.updateJsonOnGitHub(persons, "Updated JSON with new person")
-            } else {
-                Log.i(TAG, "updateToLatestDB: Failed to fetch persons.")
-            }
-        }.start() // Start the thread
-
-        return persons
+        // Fetch data synchronously
+        return handler.fetchJsonFromGitHub()
     }
 
 
