@@ -18,29 +18,39 @@
         tools:layout_editor_absoluteX="1dp"
         tools:layout_editor_absoluteY="81dp">
 
-<!--        <TextView-->
-<!--            android:id="@+id/textView"-->
-<!--            android:layout_width="218dp"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_gravity="center"-->
-<!--            android:lineSpacingExtra="4dp"-->
-<!--            android:padding="16dp"-->
-<!--            android:scrollbars="vertical"-->
-<!--            android:textSize="16sp" />-->
-
-        <ScrollView
-            android:id="@+id/scrollView"
-            android:layout_width="290dp"
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fillViewport="true">
+            android:layout_gravity="center"
+            android:lineSpacingExtra="4dp"
+            android:padding="16dp"
+            android:scrollbars="vertical"
+            android:textSize="20sp" />
 
-            <TextView
-                android:id="@+id/textView"
-                android:layout_width="290dp"
-                android:layout_height="wrap_content"
-                android:textSize="16sp"
-                android:padding="16dp" />
-        </ScrollView>
+<!--        <ScrollView-->
+<!--            android:id="@+id/scrollView"-->
+<!--            android:layout_width="290dp"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:fillViewport="true">-->
+
+<!--            <TextView-->
+<!--                android:id="@+id/textView"-->
+<!--                android:layout_width="290dp"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:textSize="16sp"-->
+<!--                android:padding="16dp" />-->
+<!--        </ScrollView>-->
+
+        <GridLayout
+            android:id="@+id/gridLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:columnCount="3"
+            android:padding="16dp"
+            android:layout_margin="16dp"
+            android:orientation="horizontal" />
 
         <Button
             android:id="@+id/btn_refresh"
