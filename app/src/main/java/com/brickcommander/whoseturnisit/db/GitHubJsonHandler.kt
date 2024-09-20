@@ -13,14 +13,15 @@ class GitHubJsonHandler(
     private val githubToken: String,
     private val repoOwner: String,
     private val repoName: String,
-    private val filePath: String
+    private val filePersonsPath: String,
+    private val fileWorkPath: String
 ) {
     private val client = OkHttpClient()
     private val gson = GsonBuilder()
         .registerTypeAdapter(LocalDate::class.java, LocalDateSerializer())
         .registerTypeAdapter(LocalDate::class.java, LocalDateDeserializer())
         .create()
-    private val apiUrl = "https://api.github.com/repos/$repoOwner/$repoName/contents/$filePath"
+    private val apiUrl = "https://api.github.com/repos/$repoOwner/$repoName/contents/$filePersonsPath"
     private var fileSha: String? = null  // Variable to store the SHA
 
     companion object {
@@ -28,41 +29,32 @@ class GitHubJsonHandler(
     }
 
     // Fetch JSON file from GitHub
-    fun fetchJsonFromGitHub(callback: (List<Person>?) -> Unit) {
+    fun fetchJsonFromGitHub(): List<Person>? {
         val request = Request.Builder()
             .url(apiUrl)
+            .header("Authorization", githubToken)
             .build()
 
         Log.i(TAG, "calling Read API: ${request.toString()}")
 
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                e.printStackTrace()
-                callback(null)
+        return try {
+            val response = client.newCall(request).execute() // Synchronous call
+            if (!response.isSuccessful) {
+                println("Failed to fetch JSON: ${response.message}")
+                return null
             }
 
-            override fun onResponse(call: Call, response: Response) {
-                response.use {
-                    if (!response.isSuccessful) {
-                        println("Failed to fetch JSON: ${response.message}")
-                        callback(null)
-                        return
-                    }
-
-                    val responseBody = response.body?.string()
-                    if (responseBody != null) {
-                        val fileInfo = gson.fromJson(responseBody, GitHubFileResponse::class.java)
-                        fileSha = fileInfo.sha  // Save the SHA
-                        val jsonContent = String(Base64.decode(fileInfo.content, Base64.DEFAULT))
-                        val personListType = object : TypeToken<List<Person>>() {}.type
-                        val persons: List<Person> = gson.fromJson(jsonContent, personListType)
-                        callback(persons)
-                    } else {
-                        callback(null)
-                    }
-                }
-            }
-        })
+            val responseBody = response.body?.string() ?: return null
+            val fileInfo = gson.fromJson(responseBody, GitHubFileResponse::class.java)
+            fileSha = fileInfo.sha  // Save the SHA
+            val jsonContent = String(Base64.decode(fileInfo.content, Base64.DEFAULT))
+            val personListType = object : TypeToken<List<Person>>() {}.type
+            gson.fromJson(jsonContent, personListType)  // Return list of persons
+        } catch (e: IOException) {
+            Log.i(TAG, "fetchJsonFromGitHub: Exception Occured : REQ=${request}")
+            e.printStackTrace()
+            null
+        }
     }
 
     // Update JSON file on GitHub
@@ -84,30 +76,28 @@ class GitHubJsonHandler(
         """.trimIndent()
 
         Log.i(TAG, "request body: $requestBody")
-        Log.i(TAG, "encodedContent: $encodedContent")
 
         val request = Request.Builder()
             .url(apiUrl)
             .header("Authorization", githubToken)
-            .put(requestBody.toRequestBody("application/vnd.github+json".toMediaType()))
+            .put(requestBody.toRequestBody("application/json".toMediaType()))
             .build()
 
-        Log.i(TAG, "calling Update API: ${request.toString()}")
+        Log.i(TAG, "calling Update API: ${request}")
 
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                e.printStackTrace()
+        try {
+            val response = client.newCall(request).execute() // Synchronous call
+            if (response.isSuccessful) {
+                println("Successfully updated the JSON file on GitHub.")
+            } else {
+                println("Failed to update the JSON file: ${response.body?.string()}")
             }
-
-            override fun onResponse(call: Call, response: Response) {
-                if (response.isSuccessful) {
-                    println("Successfully updated the JSON file on GitHub.")
-                } else {
-                    println("Failed to update the JSON file: ${response.body?.string()}")
-                }
-            }
-        })
+        } catch (e: IOException) {
+            Log.i(TAG, "updateJsonOnGitHub: Exception Occured : REQ=${request}")
+            e.printStackTrace()
+        }
     }
+
 
     // Helper data class to store GitHub file metadata response
     data class GitHubFileResponse(

@@ -29,7 +29,7 @@ class HomeActivity : AppCompatActivity() {
 
         binding.btnRefresh.setOnClickListener {
             var res = calculate.updateToLatestDB()
-            binding.textView.text = "5"
+            binding.textView.text = res.toString()
         }
 
     }
