@@ -4,40 +4,64 @@ import java.time.LocalDate
 
 class Work {
     private var currentDate: LocalDate = LocalDate.now()
-        get() = field
-        set(value) {
-            field = value
-        }
 
     private var originalTurn: String = ""
-        get() = field
-        set(value) {
-            field = value
-        }
 
     private var whoseTurnIsIt: String = "Default=Yashwant"
-        get() = field
-        set(value) {
-            field = value
-        }
 
     private var whoWillEat: List<String> = listOf("Anmol", "Yashwant", "Satyam", "Pawan")
-        get() = field
-        set(value) {
-            field = value
-        }
 
     private var isFoodCooked: Boolean = true
-        get() = field
-        set(value) {
-            field = value
-        }
 
     private var workDone: Boolean = false
-        get() = field
-        set(value) {
-            field = value
-        }
+
+    fun getCurrentDate(): LocalDate {
+        return currentDate
+    }
+
+    fun setCurrentDate(date: LocalDate) {
+        this.currentDate = date
+    }
+
+    fun getOriginalTurn(): String {
+        return originalTurn
+    }
+
+    fun setOriginalTurn(turn: String) {
+        this.originalTurn = turn
+    }
+
+    fun getWhoseTurnIsIt(): String {
+        return whoseTurnIsIt
+    }
+
+    fun setWhoseTurnIsIt(turn: String) {
+        this.whoseTurnIsIt = turn
+    }
+
+    fun getWhoWillEat(): List<String> {
+        return whoWillEat
+    }
+
+    fun setWhoWillEat(eaters: List<String>) {
+        this.whoWillEat = eaters
+    }
+
+    fun isFoodCooked(): Boolean {
+        return isFoodCooked
+    }
+
+    fun setFoodCooked(cooked: Boolean) {
+        this.isFoodCooked = cooked
+    }
+
+    fun isWorkDone(): Boolean {
+        return workDone
+    }
+
+    fun setWorkDone(done: Boolean) {
+        this.workDone = done
+    }
 
     override fun toString(): String {
         var res = """Work[currentDate=${currentDate}, originalTurn=${originalTurn}, whoseTurnIsIt=${whoseTurnIsIt}, whoWillEat=${whoWillEat}, isFoodCooked=${isFoodCooked}, workDone=${workDone}]"""

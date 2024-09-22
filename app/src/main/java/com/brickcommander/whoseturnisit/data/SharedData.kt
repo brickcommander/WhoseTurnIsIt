@@ -6,4 +6,5 @@ import com.brickcommander.whoseturnisit.model.Work
 object SharedData {
     var personsList: List<Person> = emptyList()
     var workList: List<Work> = emptyList()
+    var cacheWork: Work = Work()
 }

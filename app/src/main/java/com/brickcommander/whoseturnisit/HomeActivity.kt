@@ -27,7 +27,7 @@ class HomeActivity : AppCompatActivity() {
 
         // Fetch data on a background thread
         Thread {
-            calculate.updateToLatestDB()
+            calculate = Calculate()
         }.start()
     }
 
@@ -39,9 +39,6 @@ class HomeActivity : AppCompatActivity() {
         binding = ActivityHomeBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
-
-        // Initialize Calculate
-        calculate = Calculate()
 
         // Set onClick listener for the button
         binding.btnRefresh.setOnClickListener {
@@ -57,5 +54,14 @@ class HomeActivity : AppCompatActivity() {
             startActivity(intent)
         }
     }
+
+//    fun showWhoseTurnIsIt() {
+//        val whoseTurnIsItTextView = findViewById<TextView>(R.id.textView)
+//        whoseTurnIsItTextView.text = "NA"
+//        if(SharedData.workList.isNotEmpty()) {
+//
+//        }
+//        whoseTurnIsItTextView.setTypeface(null, Typeface.BOLD)
+//    }
 
 }
