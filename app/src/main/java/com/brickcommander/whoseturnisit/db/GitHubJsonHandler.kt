@@ -4,6 +4,7 @@ import java.io.IOException
 import java.time.LocalDate
 import android.util.Base64
 import android.util.Log
+import com.brickcommander.whoseturnisit.data.SharedData
 import com.brickcommander.whoseturnisit.model.Person
 import com.google.gson.reflect.TypeToken
 import okhttp3.MediaType.Companion.toMediaType
@@ -29,7 +30,7 @@ class GitHubJsonHandler(
     }
 
     // Fetch JSON file from GitHub
-    fun fetchJsonFromGitHub(): List<Person>? {
+    fun fetchJsonFromGitHub(){
         val request = Request.Builder()
             .url(apiUrl)
             .header("Authorization", githubToken)
@@ -37,23 +38,23 @@ class GitHubJsonHandler(
 
         Log.i(TAG, "calling Read API: ${request.toString()}")
 
-        return try {
+        try {
             val response = client.newCall(request).execute() // Synchronous call
             if (!response.isSuccessful) {
                 println("Failed to fetch JSON: ${response.message}")
-                return null
+                return
             }
 
-            val responseBody = response.body?.string() ?: return null
+            val responseBody = response.body?.string() ?: return
             val fileInfo = gson.fromJson(responseBody, GitHubFileResponse::class.java)
             fileSha = fileInfo.sha  // Save the SHA
             val jsonContent = String(Base64.decode(fileInfo.content, Base64.DEFAULT))
             val personListType = object : TypeToken<List<Person>>() {}.type
-            gson.fromJson(jsonContent, personListType)  // Return list of persons
+            Log.i(TAG, "fetchJsonFromGitHub: SUCCESS")
+            SharedData.personsList = gson.fromJson(jsonContent, personListType)  // Return list of persons
         } catch (e: IOException) {
             Log.i(TAG, "fetchJsonFromGitHub: Exception Occured : REQ=${request}")
             e.printStackTrace()
-            null
         }
     }
 

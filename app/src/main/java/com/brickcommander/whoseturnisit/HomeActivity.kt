@@ -6,15 +6,14 @@ import android.graphics.Typeface
 import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import com.brickcommander.whoseturnisit.data.SharedData
 import com.brickcommander.whoseturnisit.databinding.ActivityHomeBinding
 import com.brickcommander.whoseturnisit.logic.Calculate
-import com.brickcommander.whoseturnisit.model.Person
 
 class HomeActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityHomeBinding
     private lateinit var calculate: Calculate
-    private lateinit var persons: List<Person>
 
     companion object {
         const val TAG = "HomeActivity"
@@ -25,7 +24,7 @@ class HomeActivity : AppCompatActivity() {
 
         // Update the UI on the main thread
         runOnUiThread {
-            if (persons != null) {
+            if (SharedData.personsList.isNotEmpty()) {
                 // Clear any previous views
                 binding.gridLayout.removeAllViews()
 
@@ -42,7 +41,7 @@ class HomeActivity : AppCompatActivity() {
                 }
 
                 // Add the data rows
-                persons.forEach { person ->
+                SharedData.personsList.forEach { person ->
                     // Add the name
                     val nameTextView = TextView(this).apply {
                         text = person.getName()
@@ -78,7 +77,7 @@ class HomeActivity : AppCompatActivity() {
         Log.i(TAG, "onStart()")
         // Fetch data on a background thread
         Thread {
-            persons = calculate.updateToLatestDB() ?: emptyList()
+            calculate.updateToLatestDB()
             renderStatusGrid()
         }.start()
     }
@@ -99,7 +98,7 @@ class HomeActivity : AppCompatActivity() {
         binding.btnRefresh.setOnClickListener {
             Log.i(TAG, "onCreate(): Refresh Button Clicked")
             Thread {
-                persons = calculate.updateToLatestDB() ?: emptyList()
+                calculate.updateToLatestDB()
                 renderStatusGrid()
             }.start()
         }

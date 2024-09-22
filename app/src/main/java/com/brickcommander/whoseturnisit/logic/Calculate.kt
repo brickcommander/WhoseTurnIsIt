@@ -22,11 +22,11 @@ class Calculate {
     }
 
     // Synchronous function to fetch JSON
-    fun updateToLatestDB(): List<Person>? {
+    fun updateToLatestDB() {
         Log.i(TAG, "updateToLatestDB()")
 
         // Fetch data synchronously
-        return handler.fetchJsonFromGitHub()
+        handler.fetchJsonFromGitHub()
     }
 
 
