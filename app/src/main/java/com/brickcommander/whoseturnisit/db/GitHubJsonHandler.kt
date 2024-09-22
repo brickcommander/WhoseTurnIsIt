@@ -36,7 +36,7 @@ class GitHubJsonHandler(
             .header("Authorization", githubToken)
             .build()
 
-        Log.i(TAG, "calling Read API: ${request.toString()}")
+        Log.i(TAG, "calling Read API: ${request.url}")
 
         try {
             val response = client.newCall(request).execute() // Synchronous call
