@@ -2,7 +2,7 @@ package com.brickcommander.whoseturnisit.model
 
 import java.time.LocalDate
 
-class Work() {
+class Work {
     private var currentDate: LocalDate = LocalDate.now()
         get() = field
         set(value) {
