@@ -43,8 +43,8 @@ class Person(private val name: String) {
         return lastWorkingDay
     }
 
-    fun updateLastWorkingDay(): LocalDate {
-        this.lastWorkingDay = LocalDate.now()
+    fun updateLastWorkingDay(day: LocalDate): LocalDate {
+        this.lastWorkingDay = day
         return lastWorkingDay
     }
 

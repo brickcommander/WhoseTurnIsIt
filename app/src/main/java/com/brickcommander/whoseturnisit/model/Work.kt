@@ -7,7 +7,7 @@ class Work {
 
     private var originalTurn: String = ""
 
-    private var whoseTurnIsIt: String = "Default=Yashwant"
+    private var whoseTurnIsIt: String = ""
 
     private var whoWillEat: List<String> = listOf("Anmol", "Yashwant", "Satyam", "Pawan")
 

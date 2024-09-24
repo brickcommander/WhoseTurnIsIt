@@ -7,11 +7,13 @@ import android.util.Log
 import com.brickcommander.whoseturnisit.BuildConfig
 import com.brickcommander.whoseturnisit.data.SharedData
 import com.brickcommander.whoseturnisit.logic.Calculate
+import com.brickcommander.whoseturnisit.model.EatListCache
 import com.brickcommander.whoseturnisit.model.Person
 import com.brickcommander.whoseturnisit.model.Work
 import com.google.gson.reflect.TypeToken
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.time.LocalDateTime
 
 class GitHubJsonHandler() {
     private val githubToken = BuildConfig.GITHUB_TOKEN
@@ -20,6 +22,7 @@ class GitHubJsonHandler() {
     private val filePersonsPath = BuildConfig.FILE_PERSONS_PATH
     private val fileWorkPath = BuildConfig.FILE_WORK_PATH
     private val fileCacheWorkPath = BuildConfig.FILE_CACHEWORK_PATH
+    private val fileEatListCacheWorkPath = BuildConfig.FILE_EATLISTCACHE_PATH
 
     private val client = OkHttpClient()
     private val gson = GsonBuilder()
@@ -64,28 +67,39 @@ class GitHubJsonHandler() {
         }
     }
 
-    private fun fetchPersonsList() {
-        val jsonContent = fetchJsonFromGitHub(filePersonsPath)?: return
+    private fun fetchPersonsList(): Boolean {
+        val jsonContent = fetchJsonFromGitHub(filePersonsPath)?: return false
         val objectType = object : TypeToken<List<Person>>() {}.type
         SharedData.personsList = gson.fromJson(jsonContent, objectType)
+        return true
     }
 
-    private fun fetchWorkList() {
-        val jsonContent = fetchJsonFromGitHub(fileWorkPath)?: return
+    private fun fetchWorkList(): Boolean {
+        val jsonContent = fetchJsonFromGitHub(fileWorkPath)?: return false
         val objectType = object : TypeToken<List<Work>>() {}.type
         SharedData.workList = gson.fromJson(jsonContent, objectType)
+        return true
     }
 
-    private fun fetchCacheWork() {
-        val jsonContent = fetchJsonFromGitHub(fileCacheWorkPath)?: return
+    private fun fetchCacheWork(): Boolean {
+        val jsonContent = fetchJsonFromGitHub(fileCacheWorkPath)?: return false
         val objectType = object : TypeToken<Work>() {}.type
         SharedData.cacheWork = gson.fromJson(jsonContent, objectType)
+        return true
     }
 
-    fun fetchAllDataFromDB() {
-        fetchPersonsList()
-        fetchWorkList()
-        fetchCacheWork()
+    private fun fetchEatListCacheWork(): Boolean {
+        val jsonContent = fetchJsonFromGitHub(fileEatListCacheWorkPath)?: return false
+        val objectType = object : TypeToken<EatListCache>() {}.type
+        SharedData.eatListCache = gson.fromJson(jsonContent, objectType)
+        return true
+    }
+
+    fun fetchAllDataFromDB(): Boolean {
+        return fetchPersonsList()
+                && fetchWorkList()
+                && fetchCacheWork()
+                && fetchEatListCacheWork()
     }
 
     // Get File SHA
@@ -159,28 +173,59 @@ class GitHubJsonHandler() {
         }
     }
 
-    fun updatePersonsListInDB(person: Person) {
-        Log.i(Calculate.TAG, "updatePersonListInDB()")
-        val newPersonList = SharedData.personsList.toMutableList()
-        newPersonList.add(person)
-        val updatedJson = gson.toJson(newPersonList.toList())
-        if(updateJsonOnGitHub(updatedJson, filePersonsPath, "Update Persons List")) {
-            SharedData.personsList = newPersonList.toList()
+    fun updatePersonsListInDB(newPersonsList: List<Person>): Boolean {
+        Log.i(Calculate.TAG, "updatePersonListInDB() : personsList = $newPersonsList")
+        val updatedJson = gson.toJson(newPersonsList)
+        if(updateJsonOnGitHub(updatedJson, filePersonsPath, "Update Persons List : ${LocalDateTime.now()}")) {
+            SharedData.personsList = newPersonsList
+            return true
         }
+        return false
     }
 
-    fun updateWorkListInDB(cacheWork: Work) {
-        Log.i(Calculate.TAG, "updateWorkListInDB()")
+    fun updateWorkListInDB(cacheWork: Work): Boolean {
+        Log.i(Calculate.TAG, "updateWorkListInDB() : cacheWork = $cacheWork")
         val newWorkList = SharedData.workList.toMutableList()
         newWorkList.add(cacheWork)
         val updatedJson = gson.toJson(newWorkList.toList())
-        if(updateJsonOnGitHub(updatedJson, fileWorkPath, "Update Work List")) {
+        if(updateJsonOnGitHub(updatedJson, fileWorkPath, "Update Work List : ${LocalDateTime.now()}")) {
             SharedData.workList = newWorkList.toList()
+            SharedData.cacheWork = Work()
+            return true
         }
+        return false
     }
 
-    fun updateCacheWorkInDB() {
+    fun updateEatListCacheInDB(name: String): Boolean {
+        Log.i(Calculate.TAG, "updateEatListCacheInDB() : name = $name")
 
+        val temp = SharedData.eatListCache
+
+        if(temp.currentDate.isBefore(LocalDateTime.now().toLocalDate())) {
+            temp.currentDate = LocalDateTime.now().toLocalDate()
+            temp.whoWillEat = mutableListOf("Anmol", "Yashwant", "Satyam", "Pawan")
+        }
+
+        if(temp.whoWillEat.contains(name)) {
+            temp.whoWillEat.remove(name)
+        }
+
+        val updatedJson = gson.toJson(temp)
+        if(updateJsonOnGitHub(updatedJson, fileEatListCacheWorkPath, "Update EatListCache : ${LocalDateTime.now()}")) {
+            SharedData.eatListCache = temp
+            return true
+        }
+        return false
+    }
+
+    fun updateCacheWorkInDB(cacheWork: Work): Boolean {
+        Log.i(Calculate.TAG, "updateCacheWorkInDB()")
+        val updatedJson = gson.toJson(cacheWork)
+        if(updateJsonOnGitHub(updatedJson, fileCacheWorkPath, "Update CacheWork : ${LocalDateTime.now()}")) {
+            SharedData.cacheWork = cacheWork
+            return true
+        }
+        return false
     }
 
     // Helper data class to store GitHub file metadata response

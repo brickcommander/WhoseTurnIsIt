@@ -24,9 +24,9 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:lineSpacingExtra="4dp"
-            android:padding="16dp"
+            android:padding="20dp"
             android:scrollbars="vertical"
-            android:textSize="20sp" />
+            android:textSize="28sp" />
 
         <Button
             android:id="@+id/btn_refresh"
@@ -53,12 +53,20 @@
             android:text="Mera Khana Mat Banwana Aaj!!" />
 
         <Button
+            android:id="@+id/btn_declarefoodnotcooking"
+            android:layout_width="290dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="10dp"
+            android:text="Aaj Khana Nhi Banega" />
+
+        <Button
             android:id="@+id/btn_unabletowash"
             android:layout_width="290dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="10dp"
-            android:text="Aaj Maanj Nhi Pauga" />
+            android:text="Unable to Wash Today" />
 
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
