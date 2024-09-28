@@ -60,7 +60,7 @@ class HomeActivity : AppCompatActivity() {
             Log.i(TAG, "Declare Not Eating Button Clicked")
             Thread {
                 val options = CONSTANTS.namesInArray
-                val name = showOptionsPopup(this, options)
+                val name = showOptionsPopup(this, options, "Naam?")
                 val message = calculate.declareNotEating(name, getDay())
                 showPopupMessage(this, message)
             }.start()
@@ -70,7 +70,7 @@ class HomeActivity : AppCompatActivity() {
             Log.i(TAG, "Declare Food Not Cooking Button Clicked")
             Thread {
                 val options = getLast3Days()
-                val day = showOptionsPopup(this, options)
+                val day = showOptionsPopup(this, options, "Din?")
                 val message = calculate.declareFoodCooking(Day.fromKey(day))
                 showPopupMessage(this, message)
             }.start()
@@ -80,7 +80,7 @@ class HomeActivity : AppCompatActivity() {
             Log.i(TAG, "Unable to Wash Button Clicked")
             Thread {
                 val options = CONSTANTS.namesInArray
-                val name = showOptionsPopup(this, options)
+                val name = showOptionsPopup(this, options, "Naam?")
                 val message = calculate.declareCantWash(name, getDay())
                 showPopupMessage(this, message)
             }.start()
@@ -90,8 +90,8 @@ class HomeActivity : AppCompatActivity() {
             Log.i(TAG, "Washed Button Clicked")
             Thread {
                 val options = calculate.getPendingWorkDays()
-                val day = showOptionsPopup(this, options)
-                val name = showOptionsPopup(this, CONSTANTS.namesInArray)
+                val day = showOptionsPopup(this, options, "Din?")
+                val name = showOptionsPopup(this, CONSTANTS.namesInArray, "Naam?")
                 val message = calculate.declareWashed(name, Day.fromKey(day))
                 showPopupMessage(this, message)
             }.start()
@@ -169,16 +169,16 @@ class HomeActivity : AppCompatActivity() {
     }
 
     // Function to create and show the popup
-    private fun showOptionsPopup(context: Context, options: Array<String>): String {
+    private fun showOptionsPopup(context: Context, options: Array<String>, title: String): String {
         var resName = "P1"
         val latch = CountDownLatch(1) // Initialize a CountDownLatch
 
         runOnUiThread {
-            Log.i(TAG, "showOptionsPopup()")
+            Log.i(TAG, "showOptionsPopup : options=$options : title=$title")
 
             // Create the AlertDialog
             val builder = AlertDialog.Builder(context)
-            builder.setTitle("Name?")
+            builder.setTitle("title")
 
             // Set the options and handle item click
             builder.setItems(options) { _, which ->
