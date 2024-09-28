@@ -12,7 +12,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.WhoseTurnIsIt"
+        android:theme="@style/Theme.AppCompat"
         tools:targetApi="31">
 
         <activity
@@ -29,9 +29,18 @@
         <activity
             android:name=".ui.activity.StatusActivity"
             android:exported="true"
-            android:label="Status"
-            android:theme="@style/Theme.AppCompat">
-        </activity>
+            android:label="Status" />
+
+        <activity
+            android:name=".ui.activity.HistoryActivity"
+            android:exported="true"
+            android:label="History" />
+
+        <activity
+            android:name=".ui.activity.PendingWorkActivity"
+            android:exported="true"
+            android:label="Pending Work" />
+
     </application>
 
 </manifest>

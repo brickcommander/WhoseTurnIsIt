@@ -2,152 +2,203 @@ package com.brickcommander.whoseturnisit.logic
 
 import GitHubJsonHandler
 import android.util.Log
-import com.brickcommander.whoseturnisit.data.SharedData
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import java.time.LocalDate
-import java.time.LocalDateTime
+import com.brickcommander.whoseturnisit.data.CONSTANTS
+import com.brickcommander.whoseturnisit.model.Day
+import com.brickcommander.whoseturnisit.model.Person
+import com.brickcommander.whoseturnisit.model.Work
 
 class Calculate() {
 
-    // Create an instance of GitHubJsonHandler
     private val handler = GitHubJsonHandler()
 
     companion object {
         const val TAG = "Calculate"
     }
 
-    private fun settlePreviousDay() {
-        Log.i(TAG, "settlePreviousDay...")
-
-        val previousWork = SharedData.workList.last()
-        val cacheWork = SharedData.cacheWork
-        Log.i(TAG, "settlePreviousDay(): work = $previousWork")
-
-        val now = LocalDateTime.now()
-        val today1830 =
-            now.withHour(18).withMinute(30).withSecond(0).withNano(0) // 6:30PM current day
-        val yesterday = now.minusDays(1).toLocalDate()
-
-        if ((now.isAfter(today1830)
-                    && cacheWork.getCurrentDate().isBefore(now.toLocalDate())
-                    || cacheWork.getCurrentDate().isBefore(yesterday)
-                    ) && cacheWork.isFoodCooked()
-            && previousWork.getCurrentDate() != cacheWork.getCurrentDate()
-            && previousWork.isWorkDone()
-        ) {
-            handler.updateWorkListInDB(cacheWork)
-            updateScoreOfPersons()
+    private fun canAddWorkInHistory(history: List<Work>, cacheWork: Work): Boolean {
+        Log.i(TAG, "canAddWorkInHistory : history=$history : cacheWork=$cacheWork")
+        history.forEach { work ->
+            if (work.getDay() == cacheWork.getDay() && work.getCreatedDate() == cacheWork.getCreatedDate()) return false
         }
+        return true
     }
 
-    private fun updateScoreOfPersons() {
-        Log.i(TAG, "updateScoreOfPersons...")
+    private fun getCacheWorkIndex(day: Day): Triple<MutableList<Work>, Int, Boolean> {
+        Log.i(TAG, "getCacheWork : day=$day")
+        val cacheWorkList = handler.getCacheWorkList() ?: throw Exception("CacheWorkList is null")
 
-        val cacheWork = SharedData.cacheWork
+        cacheWorkList.forEachIndexed { index, work ->
+            if (work.getDay() == day) { // TODO: check if date check is necessary
+                return Triple(cacheWorkList, index, false)
+            }
+        }
 
-        // update the score of each person in Persons List
-        val score = 12 / cacheWork.getWhoWillEat().size
-        val currPersonsList = SharedData.personsList.toMutableList()
-        for (person in cacheWork.getWhoWillEat()) {
-            for (p in currPersonsList) {
-                if (p.getName() == person) {
-                    p.increaseScore(score)
+        cacheWorkList.add(Work(day))
+        return Triple(cacheWorkList, cacheWorkList.size - 1, true)
+    }
+
+    private fun updateScoreHistoryAndCacheWorkList(
+        index: Int,
+        cacheWorkList: MutableList<Work>,
+        updateScore: Boolean
+    ): String {
+        Log.i(
+            TAG,
+            "updateScoreHistoryAndCacheWorkList : cacheWorkList=$cacheWorkList : index=$index : updateScore=$updateScore"
+        )
+
+        val history = handler.getWorkHistory() ?: throw Exception("History is null")
+        if (canAddWorkInHistory(history, cacheWorkList[index])) {
+            history.add(cacheWorkList[index])
+            if (!handler.updateWorkHistory(history))
+                return "Update History API Failure"
+
+            // TODO: Handle the case when score gets updated but cacheWorkList is not updated
+            if (updateScore) {
+                val cacheWork = cacheWorkList[index]
+                val personList = handler.getPersonList() ?: throw Exception("Persons List is null")
+                val increaseScoreBy = 12 / cacheWork.getEatersList().size
+
+                personList.forEach { person ->
+                    // increase the score of eaters
+                    if (person.getName() in cacheWork.getEatersList()) {
+                        person.increaseScore(increaseScoreBy)
+                    }
+
+                    // reduce the score of washer by 12
+                    if (person.getName() == cacheWork.getWhoWashed()) {
+                        person.decreaseScore()
+                        person.setLastWorkingDate(cacheWork.getCreatedDate())
+                        person.setDay(cacheWork.getDay())
+                    }
+                }
+                Log.i(TAG, "updateScoreHistoryAndCacheWorkList : new personList=$personList")
+
+                if (!handler.updatePersonList(personList))
+                    return "updatePersonList API Failure. Might Cause a Major Discrepancy in DB. Please inform the Developer."
+            }
+        }
+
+        cacheWorkList.removeAt(index)
+        if (!handler.updateCacheWorkList(cacheWorkList))
+            return "updateCacheWorkList API Failure"
+
+        return "Success"
+    }
+
+    fun declareFoodCooking(day: Day): String {
+        Log.i(TAG, "declareFoodCooking : day=$day")
+        val x = getCacheWorkIndex(day)
+        val cacheWorkList = x.first
+        val needToUpdate = x.third
+
+        if (needToUpdate && !handler.updateCacheWorkList(cacheWorkList))
+            return "updateCacheWorkList API Failure"
+
+        return "Success"
+    }
+
+    fun declareWashed(name: String, day: Day): String {
+        Log.i(TAG, "declareWashed : day=$day : name=$name")
+        val x = getCacheWorkIndex(day)
+        val cacheWorkList = x.first
+        val index = x.second
+
+        cacheWorkList[index].setWhoWashed(name)
+        return updateScoreHistoryAndCacheWorkList(index, cacheWorkList, true)
+    }
+
+    fun whoseTurnIsIt(day: Day): String {
+        Log.i(TAG, "whoseTurnIsIt : day=$day")
+        val personList = handler.getPersonList() ?: throw Exception("Persons List is null")
+        var resPerson: Person? = null
+
+        var eatersList = CONSTANTS.namesInList
+        var unableToWashList: List<String> = listOf()
+        val cacheWorkList = handler.getCacheWorkList() ?: throw Exception("CacheWorkList is null")
+        if(cacheWorkList.isNotEmpty()) {
+            cacheWorkList.forEach { work ->
+                if (work.getDay() == day) {
+                    unableToWashList = work.getUnableToWash()
+                    eatersList = work.getEatersList()
                 }
             }
         }
+        Log.i( TAG, "whoseTurnIsIt : cacheWorkList=$cacheWorkList : unableToWashList=$unableToWashList : personList=$personList")
 
-        // reduce the score of the person who washed the dishes and update the last working day
-        for (p in currPersonsList) {
-            if (p.getName() == cacheWork.getWhoseTurnIsIt()) {
-                p.decreaseScore()
-                p.updateLastWorkingDay(cacheWork.getCurrentDate())
+        personList.forEach { person ->
+            Log.i(TAG, "whoseTurnIsIt : person=$person")
+            if ((resPerson == null
+                        || person.getScore() > resPerson!!.getScore()
+                        || (person.getScore() == resPerson!!.getScore()
+                            && person.getLastWorkingDate().isBefore(resPerson!!.getLastWorkingDate()))
+                        || (person.getScore() == resPerson!!.getScore()
+                            && person.getLastWorkingDate().isEqual(resPerson!!.getLastWorkingDate())
+                            && person.getDay().value < resPerson!!.getDay().value)
+                )
+                && (person.getName() !in unableToWashList)
+                && (person.getName() in eatersList)
+            ) {
+                resPerson = person
             }
         }
+        Log.i(TAG, "whoseTurnIsIt : resPerson=$resPerson")
 
-        handler.updatePersonsListInDB(currPersonsList.toList())
+        if (resPerson == null)
+            return "No Valid Person Available"
+        else
+            return resPerson!!.getName()
     }
 
-    suspend fun refresh() {
-        Log.i(TAG, "refresh...")
+    fun declareNotEating(name: String, day: Day): String {
+        Log.i(TAG, "declareNotEating : day=$day : name=$name")
+        val x = getCacheWorkIndex(day)
+        val cacheWorkList = x.first
+        val index = x.second
 
-        withContext(Dispatchers.IO) {
-            // Fetch data synchronously
-            handler.fetchAllDataFromDB()
-            settlePreviousDay()
-
-            val now = LocalDateTime.now()
-            val today1830 =
-                now.withHour(18).withMinute(30).withSecond(0).withNano(0) // 6:30PM current day
-            if (now.isAfter(today1830) && SharedData.eatListCache.currentDate == SharedData.cacheWork.getCurrentDate()) {
-                val cacheWorkTemp = SharedData.cacheWork
-                cacheWorkTemp.setWhoWillEat(SharedData.eatListCache.whoWillEat.toList())
-                handler.updateCacheWorkInDB(cacheWorkTemp)
-            }
-        }
+        val needToUpdate = cacheWorkList[index].updateEatersList(name)
+        if (needToUpdate && !handler.updateCacheWorkList(cacheWorkList))
+            return "updateCacheWorkList API Failure"
+        else
+            return "Success"
     }
 
-    init {
-        Log.i(TAG, "Constructor...")
-//        refresh()
+    fun declareCantWash(name: String, day: Day): String {
+        Log.i(TAG, "declareCantWashToday : name=$name, day=$day")
+        val x = getCacheWorkIndex(day)
+        val cacheWorkList = x.first
+        val index = x.second
+
+        val needToUpdate = cacheWorkList[index].setUnableToWash(name)
+        if (needToUpdate && !handler.updateCacheWorkList(cacheWorkList))
+            return "updateCacheWorkList API Failure"
+        else
+            return "Success"
     }
 
-    suspend fun getWhoseTurnIsIt(): String {
-        Log.i(TAG, "getWhoseTurnIsIt...")
-
-        val previousWork = SharedData.workList.last()
-        Log.i(TAG, "getWhoseTurnIsIt(): previousWork = $previousWork")
-
-        val now = LocalDateTime.now()
-        val today1830 =
-            now.withHour(1).withMinute(30).withSecond(0).withNano(0) // 6:30PM current day
-
-        var personName: String = "NA"
-        if(now.isAfter(today1830)) {
-            var lastWorkingDay = LocalDate.now()
-            var maxScore = Int.MIN_VALUE
-            SharedData.personsList.forEach {
-                person -> if(SharedData.eatListCache.whoWillEat.contains(person.getName())
-                            && (person.getScore() > maxScore
-                                || person.getScore() == maxScore && person.getLastWorkingDay().isBefore(lastWorkingDay))) {
-                    maxScore = person.getScore()
-                    lastWorkingDay = person.getLastWorkingDay()
-                    personName = person.getName()
-                }
-            }
-            SharedData.cacheWork.setOriginalTurn(personName)
-            SharedData.cacheWork.setWhoseTurnIsIt(personName)
-            withContext(Dispatchers.IO) {
-                handler.updateCacheWorkInDB(SharedData.cacheWork)
-            }
-        }
-
-        return personName
+    fun getPersonStatus(): List<Person> {
+        Log.i(TAG, "getPersonStatus...")
+        val personList = handler.getPersonList() ?: throw Exception("Persons List is null")
+        return personList
     }
 
-    suspend fun updateEatersList(name: String): Boolean {
-        Log.i(TAG, "updateEatersList : name=$name")
-        return withContext(Dispatchers.IO) {
-            handler.updateEatListCacheInDB(name)
-        }
+    fun getPendingWork(): List<Work> {
+        Log.i(TAG, "getPendingWork...")
+        val cacheWorkList = handler.getCacheWorkList() ?: throw Exception("CacheWorkList is null")
+        return cacheWorkList
     }
 
-//    suspend fun updateFoodStatus(): Boolean {
-//
-//        return true
-//    }
+    fun getPendingWorkDays(): Array<String> {
+        Log.i(TAG, "getPendingWorkDays...")
+        val cacheWorkList = handler.getCacheWorkList() ?: throw Exception("CacheWorkList is null")
+        val pendingWorkDays = cacheWorkList.map { it.getDay().name }.toTypedArray()
+        return pendingWorkDays
+    }
 
-//    fun updateWasherStatus(): String {
-//        val now = LocalDateTime.now()
-//        val today1830 =
-//            now.withHour(18).withMinute(30).withSecond(0).withNano(0) // 6:30PM current day
-//        val today1200 = now.withHour(12).withMinute(0).withSecond(0).withNano(0) // 12:00PM current day
-//
-//        if(now.isAfter(today1200) && now.isBefore(today1830)) {
-//            SharedData.cacheWork.
-//        } else {
-//            return "Please update between 1200 and 1830 Hours"
-//        }
-//    }
+    fun getHistory(): List<Work> {
+        Log.i(TAG, "getHistory...")
+        val historyList = handler.getWorkHistory() ?: throw Exception("History is null")
+        return historyList
+    }
 
 }

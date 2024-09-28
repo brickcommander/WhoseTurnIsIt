@@ -27,7 +27,7 @@
             android:lineSpacingExtra="4dp"
             android:padding="20dp"
             android:scrollbars="vertical"
-            android:textSize="28sp" />
+            android:textSize="32sp" />
 
         <Button
             android:id="@+id/btn_refresh"
@@ -46,28 +46,53 @@
             android:text="Status" />
 
         <Button
-            android:id="@+id/btn_declarenoteating"
+            android:id="@+id/btn_pending_work"
             android:layout_width="290dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="10dp"
-            android:text="Mera Khana Mat Banwana Aaj!!" />
+            android:text="Pending Work" />
 
         <Button
-            android:id="@+id/btn_declarefoodnotcooking"
+            android:id="@+id/btn_declare_not_eating"
             android:layout_width="290dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="10dp"
-            android:text="Aaj Khana Nhi Banega" />
+            android:text="Not Eating Today" />
 
         <Button
-            android:id="@+id/btn_unabletowash"
+            android:id="@+id/btn_declare_food_cooking"
+            android:layout_width="290dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="10dp"
+            android:text="Food Cooking Today" />
+
+        <Button
+            android:id="@+id/btn_unable_to_wash"
             android:layout_width="290dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="10dp"
             android:text="Unable to Wash Today" />
+
+        <Button
+            android:id="@+id/btn_washed"
+            android:layout_width="290dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="10dp"
+            android:text="Washed" />
+
+        <Button
+            android:id="@+id/btn_history"
+            android:layout_width="290dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="10dp"
+            android:text="History" />
+
 
         <TextView
             android:id="@+id/textView3"

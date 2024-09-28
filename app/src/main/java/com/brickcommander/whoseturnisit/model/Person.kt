@@ -3,12 +3,13 @@ package com.brickcommander.whoseturnisit.model
 import java.time.LocalDate
 
 class Person(private val name: String) {
-    private var score: Int
-    private var lastWorkingDay: LocalDate
+    private var score: Int = 0
+    private var lastWorkingDate: LocalDate
+    private var day: String
 
     init {
-        this.score = 0
-        this.lastWorkingDay = LocalDate.now()
+        lastWorkingDate = LocalDate.now()
+        day = Day.Default.name
     }
 
     fun getName(): String {
@@ -19,13 +20,12 @@ class Person(private val name: String) {
         return score
     }
 
-    fun getLastWorkingDay(): LocalDate {
-        return lastWorkingDay
+    fun getLastWorkingDate(): LocalDate {
+        return lastWorkingDate
     }
 
-    fun setScore(score: Int): Int {
-        this.score = score
-        return score
+    fun getDay(): Day {
+        return Day.fromKey(day)
     }
 
     fun increaseScore(increaseBy: Int): Int {
@@ -38,18 +38,16 @@ class Person(private val name: String) {
         return score
     }
 
-    fun setLastWorkingDay(lastWorkingDay: LocalDate): LocalDate {
-        this.lastWorkingDay = lastWorkingDay
-        return lastWorkingDay
+    fun setLastWorkingDate(date: LocalDate) {
+        this.lastWorkingDate = date
     }
 
-    fun updateLastWorkingDay(day: LocalDate): LocalDate {
-        this.lastWorkingDay = day
-        return lastWorkingDay
+    fun setDay(day: Day) {
+        this.day = day.name
     }
 
     override fun toString(): String {
-        var res = """Person[Name=${name}, Score=${score}, LastWorkingDay=${lastWorkingDay}]"""
+        var res = """Person[Name=${name}, Score=${score}, LastWorkingDate=${lastWorkingDate}, Day=${day}]"""
         return res
     }
 }

@@ -1,70 +1,56 @@
 package com.brickcommander.whoseturnisit.model
 
+import com.brickcommander.whoseturnisit.data.CONSTANTS
 import java.time.LocalDate
 
-class Work {
-    private var currentDate: LocalDate = LocalDate.now()
+class Work(d: Day) {
 
-    private var originalTurn: String = ""
 
-    private var whoseTurnIsIt: String = ""
+    private val createdDate: LocalDate = LocalDate.now()
+    private val day: String = d.name
+    private var eatersList: MutableList<String> = CONSTANTS.namesInList.toMutableList()
+    private var unableToWash: MutableList<String> = mutableListOf()
+    private var foodCooked: Boolean = true
+    private var whoWashed: String = "NA"
 
-    private var whoWillEat: List<String> = listOf("Anmol", "Yashwant", "Satyam", "Pawan")
-
-    private var isFoodCooked: Boolean = true
-
-    private var workDone: Boolean = false
-
-    fun getCurrentDate(): LocalDate {
-        return currentDate
+    fun getCreatedDate(): LocalDate {
+        return createdDate
     }
 
-    fun setCurrentDate(date: LocalDate) {
-        this.currentDate = date
+    fun getDay(): Day {
+        return Day.fromKey(day)
     }
 
-    fun getOriginalTurn(): String {
-        return originalTurn
+    fun getEatersList(): MutableList<String> {
+        return eatersList
     }
 
-    fun setOriginalTurn(turn: String) {
-        this.originalTurn = turn
+    fun updateEatersList(name: String): Boolean {
+        return eatersList.remove(name)
     }
 
-    fun getWhoseTurnIsIt(): String {
-        return whoseTurnIsIt
+    fun getUnableToWash(): MutableList<String> {
+        return unableToWash
     }
 
-    fun setWhoseTurnIsIt(turn: String) {
-        this.whoseTurnIsIt = turn
-    }
-
-    fun getWhoWillEat(): List<String> {
-        return whoWillEat
-    }
-
-    fun setWhoWillEat(eaters: List<String>) {
-        this.whoWillEat = eaters
+    fun setUnableToWash(name: String): Boolean {
+        return this.unableToWash.add(name)
     }
 
     fun isFoodCooked(): Boolean {
-        return isFoodCooked
+        return foodCooked
     }
 
-    fun setFoodCooked(cooked: Boolean) {
-        this.isFoodCooked = cooked
+    fun getWhoWashed(): String {
+        return whoWashed
     }
 
-    fun isWorkDone(): Boolean {
-        return workDone
-    }
-
-    fun setWorkDone(done: Boolean) {
-        this.workDone = done
+    fun setWhoWashed(washed: String) {
+        this.whoWashed = washed
     }
 
     override fun toString(): String {
-        var res = """Work[currentDate=${currentDate}, originalTurn=${originalTurn}, whoseTurnIsIt=${whoseTurnIsIt}, whoWillEat=${whoWillEat}, isFoodCooked=${isFoodCooked}, workDone=${workDone}]"""
-        return res
+        return """Work[createdDate=${createdDate}, day=${day}, eatersList=${eatersList}, unableToWash=${unableToWash}, foodCooked=${foodCooked}, whoWashed=${whoWashed}]"""
     }
+
 }
