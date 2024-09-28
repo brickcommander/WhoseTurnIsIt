@@ -3,12 +3,10 @@ package com.brickcommander.whoseturnisit.ui
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.brickcommander.whoseturnisit.R
 import com.brickcommander.whoseturnisit.model.Work
-import java.time.LocalDate
 
 class ItemAdapter(private val items: MutableList<Work>) :
     RecyclerView.Adapter<ItemAdapter.ViewHolder>() {
@@ -32,7 +30,7 @@ class ItemAdapter(private val items: MutableList<Work>) :
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = items[position]
-        holder.createdDate.text = "Created Date: " + item.getWhoWashed()
+        holder.createdDate.text = "Created Date: " + item.getCreatedDate().toString()
         holder.day.text = "Day: " + item.getDay().toString()
         holder.eatersList.text = "Eaters: " + item.getEatersList().toString()
         holder.unableToWash.text = "Unable To Wash: " + item.getUnableToWash().toString()
