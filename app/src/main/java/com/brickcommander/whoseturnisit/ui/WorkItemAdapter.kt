@@ -8,8 +8,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.brickcommander.whoseturnisit.R
 import com.brickcommander.whoseturnisit.model.Work
 
-class ItemAdapter(private val items: MutableList<Work>) :
-    RecyclerView.Adapter<ItemAdapter.ViewHolder>() {
+class WorkItemAdapter(private val items: MutableList<Work>) :
+    RecyclerView.Adapter<WorkItemAdapter.ViewHolder>() {
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
@@ -47,13 +47,11 @@ class ItemAdapter(private val items: MutableList<Work>) :
         return items.size
     }
 
-    // Method to add an item
     fun addItem(item: Work) {
         items.add(item)
         notifyItemInserted(items.size - 1)
     }
 
-    // Method to remove an item
     private fun removeItem(position: Int) {
         items.removeAt(position)
         notifyItemRemoved(position)
