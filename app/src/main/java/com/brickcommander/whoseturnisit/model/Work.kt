@@ -34,6 +34,7 @@ class Work(d: Day) {
     }
 
     fun setUnableToWash(name: String): Boolean {
+        if(this.unableToWash.contains(name)) return false
         return this.unableToWash.add(name)
     }
 

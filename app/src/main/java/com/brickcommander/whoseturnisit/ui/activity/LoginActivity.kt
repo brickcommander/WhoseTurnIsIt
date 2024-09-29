@@ -10,28 +10,44 @@ import androidx.appcompat.app.AppCompatActivity
 import com.brickcommander.whoseturnisit.R
 import com.brickcommander.whoseturnisit.data.CONSTANTS
 import com.brickcommander.whoseturnisit.data.SharedData
+import com.brickcommander.whoseturnisit.logic.SharedPreferencesHandler
+import com.brickcommander.whoseturnisit.ui.activity.HomeActivity.Companion.TAG
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var pinInput: EditText
     private lateinit var btnLogin: Button
+
+    private fun startHomeActivity(username: String) {
+        startActivity(Intent(this, HomeActivity::class.java))
+        Toast.makeText(this, "Welcome $username", Toast.LENGTH_SHORT).show()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
         Log.i("LoginActivity", "onCreate()")
 
-        pinInput = findViewById(R.id.pin_input)
-        btnLogin = findViewById(R.id.btn_pin_input)
+        var username: String = SharedPreferencesHandler.getUsername(this)
+        Log.i(TAG, "sharedPreferences : username=$username")
 
-        btnLogin.setOnClickListener {
-            var pin = pinInput.text.toString()
-            if (pin.length == 4 && CONSTANTS.pinArray.contains(pin)) {
-                Toast.makeText(this, "Correct PIN", Toast.LENGTH_SHORT).show()
-                SharedData.username = CONSTANTS.pinToNameMap[pin].toString()
-                startActivity(Intent(this, HomeActivity::class.java))
-            } else {
-                pinInput.setText("")
-                Toast.makeText(this, "Invalid PIN", Toast.LENGTH_SHORT).show()
+        if(CONSTANTS.namesInList.contains(username)) {
+            startHomeActivity(username)
+        } else {
+            pinInput = findViewById(R.id.pin_input)
+            btnLogin = findViewById(R.id.btn_pin_input)
+
+            btnLogin.setOnClickListener {
+                val pin = pinInput.text.toString()
+                if (pin.length == 4 && CONSTANTS.pinArray.contains(pin)) {
+                    username = CONSTANTS.pinToNameMap[pin].toString()
+                    SharedData.username = username
+                    SharedPreferencesHandler.update(username, this)
+
+                    startHomeActivity(username)
+                } else {
+                    pinInput.setText("")
+                    Toast.makeText(this, "Invalid PIN", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }

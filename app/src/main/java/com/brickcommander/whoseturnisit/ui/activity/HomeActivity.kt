@@ -7,9 +7,10 @@ import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.brickcommander.whoseturnisit.data.CONSTANTS
+import com.brickcommander.whoseturnisit.data.SharedData
 import com.brickcommander.whoseturnisit.databinding.ActivityHomeBinding
 import com.brickcommander.whoseturnisit.logic.Calculate
+import com.brickcommander.whoseturnisit.logic.SharedPreferencesHandler
 import com.brickcommander.whoseturnisit.model.Day
 import java.time.DayOfWeek
 import java.time.LocalDateTime
@@ -24,6 +25,12 @@ class HomeActivity : AppCompatActivity() {
         const val TAG = "HomeActivity"
     }
 
+    override fun onStart() {
+        super.onStart()
+        SharedData.username = SharedPreferencesHandler.getUsername(this)
+        Log.i(TAG, "onStart() : username=${SharedData.username}")
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -33,73 +40,84 @@ class HomeActivity : AppCompatActivity() {
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        calculate = Calculate()
-        updateWhoseTurnIsIt()
-
-        binding.btnRefresh.setOnClickListener {
-            Log.i(TAG, "Refresh Button Clicked")
+        try {
+            calculate = Calculate()
             updateWhoseTurnIsIt()
-        }
 
-        binding.btnStatus.setOnClickListener {
-            Log.i(TAG, "Status Button Clicked")
-            val intent = Intent(this, StatusActivity::class.java)
+            binding.btnRefresh.setOnClickListener {
+                Log.i(TAG, "Refresh Button Clicked")
+                updateWhoseTurnIsIt()
+            }
+
+            binding.btnStatus.setOnClickListener {
+                Log.i(TAG, "Status Button Clicked")
+                val intent = Intent(this, StatusActivity::class.java)
+                startActivity(intent)
+            }
+
+            binding.btnPendingWork.setOnClickListener {
+                Log.i(TAG, "Pending Work Button Clicked")
+                val intent = Intent(this, PendingWorkActivity::class.java)
+                startActivity(intent)
+            }
+
+            binding.btnDeclareNotEating.setOnClickListener {
+                Log.i(TAG, "Declare Not Eating Button Clicked")
+                Thread {
+                    val name = SharedData.username
+                    val message = calculate.declareNotEating(name, getDay())
+                    showPopupMessage(this, message)
+                }.start()
+            }
+
+            binding.btnDeclareFoodCooking.setOnClickListener {
+                Log.i(TAG, "Declare Food Not Cooking Button Clicked")
+                Thread {
+                    val options = getLast3Days()
+                    val day = showOptionsPopup(this, options, "Din?")
+                    val message = calculate.declareFoodCooking(Day.fromKey(day))
+                    showPopupMessage(this, message)
+                }.start()
+            }
+
+            binding.btnUnableToWash.setOnClickListener {
+                Log.i(TAG, "Unable to Wash Button Clicked")
+                Thread {
+                    val name = SharedData.username
+                    val message = calculate.declareCantWash(name, getDay())
+                    showPopupMessage(this, message)
+                }.start()
+            }
+
+            binding.btnWashed.setOnClickListener {
+                Log.i(TAG, "Washed Button Clicked")
+                Thread {
+                    val options = calculate.getPendingWorkDays()
+                    val day = showOptionsPopup(this, options, "Din?")
+                    val name = SharedData.username
+                    val message = calculate.declareWashed(name, Day.fromKey(day))
+                    showPopupMessage(this, message)
+                }.start()
+            }
+
+            binding.btnHistory.setOnClickListener {
+                Log.i(TAG, "History Button Clicked")
+                val intent = Intent(this, HistoryActivity::class.java)
+                startActivity(intent)
+            }
+
+            binding.btnLogout.setOnClickListener {
+                Log.i(TAG, "Logout Button Clicked")
+                SharedPreferencesHandler.clear(this)
+
+                val intent = Intent(this, LoginActivity::class.java)
+                startActivity(intent)
+            }
+            throw Exception("TESTING")
+        } catch (e: Exception) {
+            val intent = Intent(this, ExceptionActivity::class.java)
             startActivity(intent)
         }
-
-        binding.btnPendingWork.setOnClickListener {
-            Log.i(TAG, "Pending Work Button Clicked")
-            val intent = Intent(this, PendingWorkActivity::class.java)
-            startActivity(intent)
-        }
-
-        binding.btnDeclareNotEating.setOnClickListener {
-            Log.i(TAG, "Declare Not Eating Button Clicked")
-            Thread {
-                val options = CONSTANTS.namesInArray
-                val name = showOptionsPopup(this, options, "Naam?")
-                val message = calculate.declareNotEating(name, getDay())
-                showPopupMessage(this, message)
-            }.start()
-        }
-
-        binding.btnDeclareFoodCooking.setOnClickListener {
-            Log.i(TAG, "Declare Food Not Cooking Button Clicked")
-            Thread {
-                val options = getLast3Days()
-                val day = showOptionsPopup(this, options, "Din?")
-                val message = calculate.declareFoodCooking(Day.fromKey(day))
-                showPopupMessage(this, message)
-            }.start()
-        }
-
-        binding.btnUnableToWash.setOnClickListener {
-            Log.i(TAG, "Unable to Wash Button Clicked")
-            Thread {
-                val options = CONSTANTS.namesInArray
-                val name = showOptionsPopup(this, options, "Naam?")
-                val message = calculate.declareCantWash(name, getDay())
-                showPopupMessage(this, message)
-            }.start()
-        }
-
-        binding.btnWashed.setOnClickListener {
-            Log.i(TAG, "Washed Button Clicked")
-            Thread {
-                val options = calculate.getPendingWorkDays()
-                val day = showOptionsPopup(this, options, "Din?")
-                val name = showOptionsPopup(this, CONSTANTS.namesInArray, "Naam?")
-                val message = calculate.declareWashed(name, Day.fromKey(day))
-                showPopupMessage(this, message)
-            }.start()
-        }
-
-        binding.btnHistory.setOnClickListener {
-            Log.i(TAG, "History Button Clicked")
-            val intent = Intent(this, HistoryActivity::class.java)
-            startActivity(intent)
-        }
-
     }
 
     private fun updateWhoseTurnIsIt() {
@@ -175,7 +193,7 @@ class HomeActivity : AppCompatActivity() {
 
             // Create the AlertDialog
             val builder = AlertDialog.Builder(context)
-            builder.setTitle("title")
+            builder.setTitle(title)
 
             // Set the options and handle item click
             builder.setItems(options) { _, which ->
