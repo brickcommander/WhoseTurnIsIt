@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Whose Turn Is It?</string>
+    <string name="login_activity_title">Login</string>
 </resources>

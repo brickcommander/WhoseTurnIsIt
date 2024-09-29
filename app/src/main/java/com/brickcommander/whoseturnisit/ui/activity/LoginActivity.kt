@@ -26,6 +26,7 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
         Log.i("LoginActivity", "onCreate()")
+        setTitle(R.string.login_activity_title)
 
         var username: String = SharedPreferencesHandler.getUsername(this)
         Log.i(TAG, "sharedPreferences : username=$username")

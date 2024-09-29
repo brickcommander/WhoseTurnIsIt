@@ -18,7 +18,6 @@
         <activity
             android:name=".ui.activity.LoginActivity"
             android:exported="true"
-            android:label="Login"
             android:theme="@style/Theme.AppCompat">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
