@@ -8,6 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
+import com.brickcommander.whoseturnisit.data.CONSTANTS
 import com.brickcommander.whoseturnisit.data.SharedData
 import com.brickcommander.whoseturnisit.databinding.ActivityHomeBinding
 import com.brickcommander.whoseturnisit.logic.Calculate
@@ -66,11 +67,16 @@ class HomeActivity : AppCompatActivity() {
                 startActivity(intent)
             }
 
-            binding.btnDeclareNotEating.isVisible = (SharedData.username != "Master")
             binding.btnDeclareNotEating.setOnClickListener {
                 Log.i(TAG, "Declare Not Eating Button Clicked")
                 Thread {
-                    val name = SharedData.username
+                    var name = SharedData.username
+                    if(SharedData.username == "Master") {
+                        val optionIdx = showOptionsPopup(this, CONSTANTS.namesInArray, "Kon?")
+                        if(optionIdx != -1) {
+                            name = CONSTANTS.namesInArray[optionIdx]
+                        }
+                    }
                     val message = calculate.declareNotEating(name, getDay())
                     showPopupMessage(this, message)
                 }.start()
@@ -90,11 +96,17 @@ class HomeActivity : AppCompatActivity() {
                 }.start()
             }
 
-            binding.btnUnableToWash.isVisible = (SharedData.username != "Master")
             binding.btnUnableToWash.setOnClickListener {
                 Log.i(TAG, "Unable to Wash Button Clicked")
+
                 Thread {
-                    val name = SharedData.username
+                    var name = SharedData.username
+                    if(SharedData.username == "Master") {
+                        val optionIdx = showOptionsPopup(this, CONSTANTS.namesInArray, "Kon?")
+                        if(optionIdx != -1) {
+                            name = CONSTANTS.namesInArray[optionIdx]
+                        }
+                    }
                     val message = calculate.declareCantWash(name, getDay())
                     showPopupMessage(this, message)
                 }.start()
@@ -125,10 +137,10 @@ class HomeActivity : AppCompatActivity() {
             binding.btnRemovePendingItem.isVisible = (SharedData.username == "Master")
             binding.btnRemovePendingItem.setOnClickListener {
                 Log.i(TAG, "Remove Pending Item Button Clicked")
+
                 Thread {
                     val options = calculate.getPendingWorkDaysIds()
                     val optionIdx = showOptionsPopup(this, getDaysList(options), "Din?")
-
                     var message = "No Pending Items"
                     if(optionIdx != -1) {
                         message = calculate.removePendingItem(options[optionIdx].second)
@@ -139,10 +151,12 @@ class HomeActivity : AppCompatActivity() {
 
             binding.btnLogout.setOnClickListener {
                 Log.i(TAG, "Logout Button Clicked")
+
                 SharedPreferencesHandler.clear(this)
 
                 val intent = Intent(this, LoginActivity::class.java)
                 startActivity(intent)
+                finish()
             }
         } catch (e: Exception) {
             Log.i(TAG, "Exception Occured : ${e.message}")
