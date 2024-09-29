@@ -5,13 +5,17 @@ import java.time.LocalDate
 
 class Work(d: Day) {
 
-
+    private val id: String = java.util.UUID.randomUUID().toString()
     private val createdDate: LocalDate = LocalDate.now()
     private val day: String = d.name
     private var eatersList: MutableList<String> = CONSTANTS.namesInList.toMutableList()
     private var unableToWash: MutableList<String> = mutableListOf()
     private var foodCooked: Boolean = true
     private var whoWashed: String = "NA"
+
+    fun getId(): String {
+        return id
+    }
 
     fun getCreatedDate(): LocalDate {
         return createdDate
@@ -51,7 +55,7 @@ class Work(d: Day) {
     }
 
     override fun toString(): String {
-        return """Work[createdDate=${createdDate}, day=${day}, eatersList=${eatersList}, unableToWash=${unableToWash}, foodCooked=${foodCooked}, whoWashed=${whoWashed}]"""
+        return """Work[id=${id}, createdDate=${createdDate}, day=${day}, eatersList=${eatersList}, unableToWash=${unableToWash}, foodCooked=${foodCooked}, whoWashed=${whoWashed}]"""
     }
 
 }

@@ -7,6 +7,7 @@ import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import com.brickcommander.whoseturnisit.data.SharedData
 import com.brickcommander.whoseturnisit.databinding.ActivityHomeBinding
 import com.brickcommander.whoseturnisit.logic.Calculate
@@ -40,6 +41,9 @@ class HomeActivity : AppCompatActivity() {
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        SharedData.username = SharedPreferencesHandler.getUsername(this)
+        Log.i(TAG, "onCreate() : username=${SharedData.username}")
+
         try {
             calculate = Calculate()
             updateWhoseTurnIsIt()
@@ -47,6 +51,7 @@ class HomeActivity : AppCompatActivity() {
             binding.btnRefresh.setOnClickListener {
                 Log.i(TAG, "Refresh Button Clicked")
                 updateWhoseTurnIsIt()
+                calculate.removeOldPendingItems()
             }
 
             binding.btnStatus.setOnClickListener {
@@ -61,6 +66,7 @@ class HomeActivity : AppCompatActivity() {
                 startActivity(intent)
             }
 
+            binding.btnDeclareNotEating.isVisible = (SharedData.username != "Master")
             binding.btnDeclareNotEating.setOnClickListener {
                 Log.i(TAG, "Declare Not Eating Button Clicked")
                 Thread {
@@ -74,12 +80,17 @@ class HomeActivity : AppCompatActivity() {
                 Log.i(TAG, "Declare Food Not Cooking Button Clicked")
                 Thread {
                     val options = getLast3Days()
-                    val day = showOptionsPopup(this, options, "Din?")
-                    val message = calculate.declareFoodCooking(Day.fromKey(day))
+                    var message = "Error Occured!"
+
+                    val optionIdx = showOptionsPopup(this, options, "Din?")
+                    if(optionIdx != -1) {
+                        message = calculate.declareFoodCooking(Day.fromKey(options[optionIdx]))
+                    }
                     showPopupMessage(this, message)
                 }.start()
             }
 
+            binding.btnUnableToWash.isVisible = (SharedData.username != "Master")
             binding.btnUnableToWash.setOnClickListener {
                 Log.i(TAG, "Unable to Wash Button Clicked")
                 Thread {
@@ -89,13 +100,18 @@ class HomeActivity : AppCompatActivity() {
                 }.start()
             }
 
+            binding.btnWashed.isVisible = (SharedData.username != "Master")
             binding.btnWashed.setOnClickListener {
                 Log.i(TAG, "Washed Button Clicked")
                 Thread {
-                    val options = calculate.getPendingWorkDays()
-                    val day = showOptionsPopup(this, options, "Din?")
-                    val name = SharedData.username
-                    val message = calculate.declareWashed(name, Day.fromKey(day))
+                    val options = calculate.getPendingWorkDaysIds()
+                    val optionIdx = showOptionsPopup(this, getDaysList(options), "Din?")
+
+                    var message = "Please Create an Entry First."
+                    if(optionIdx != -1) {
+                        val name = SharedData.username
+                        message = calculate.declareWashed(name, Day.fromKey(options[optionIdx].first))
+                    }
                     showPopupMessage(this, message)
                 }.start()
             }
@@ -106,6 +122,21 @@ class HomeActivity : AppCompatActivity() {
                 startActivity(intent)
             }
 
+            binding.btnRemovePendingItem.isVisible = (SharedData.username == "Master")
+            binding.btnRemovePendingItem.setOnClickListener {
+                Log.i(TAG, "Remove Pending Item Button Clicked")
+                Thread {
+                    val options = calculate.getPendingWorkDaysIds()
+                    val optionIdx = showOptionsPopup(this, getDaysList(options), "Din?")
+
+                    var message = "No Pending Items"
+                    if(optionIdx != -1) {
+                        message = calculate.removePendingItem(options[optionIdx].second)
+                    }
+                    showPopupMessage(this, message)
+                }.start()
+            }
+
             binding.btnLogout.setOnClickListener {
                 Log.i(TAG, "Logout Button Clicked")
                 SharedPreferencesHandler.clear(this)
@@ -113,8 +144,8 @@ class HomeActivity : AppCompatActivity() {
                 val intent = Intent(this, LoginActivity::class.java)
                 startActivity(intent)
             }
-            throw Exception("TESTING")
         } catch (e: Exception) {
+            Log.i(TAG, "Exception Occured : ${e.message}")
             val intent = Intent(this, ExceptionActivity::class.java)
             startActivity(intent)
         }
@@ -157,7 +188,7 @@ class HomeActivity : AppCompatActivity() {
         val hour1800 = LocalDateTime.now().withHour(18)
 
         if (now.dayOfWeek == DayOfWeek.SUNDAY) {
-            return arrayOf(Day.SaturdayMorning.name, Day.SaturdayEvening.name)
+            return arrayOf(Day.SaturdayMorning.name, Day.SaturdayEvening.name, Day.Sunday.name)
         }
 
         if (now.dayOfWeek == DayOfWeek.SATURDAY) {
@@ -184,12 +215,13 @@ class HomeActivity : AppCompatActivity() {
     }
 
     // Function to create and show the popup
-    private fun showOptionsPopup(context: Context, options: Array<String>, title: String): String {
-        var resName = "P1"
+    private fun showOptionsPopup(context: Context, options: Array<String>, title: String): Int {
+        var resIdx = -1
         val latch = CountDownLatch(1) // Initialize a CountDownLatch
+        if(options.isEmpty()) return resIdx
 
         runOnUiThread {
-            Log.i(TAG, "showOptionsPopup : options=$options : title=$title")
+            Log.i(TAG, "showOptionsPopup : options=${options.toString()} : title=$title")
 
             // Create the AlertDialog
             val builder = AlertDialog.Builder(context)
@@ -197,7 +229,7 @@ class HomeActivity : AppCompatActivity() {
 
             // Set the options and handle item click
             builder.setItems(options) { _, which ->
-                resName = options[which]
+                resIdx = which
                 latch.countDown() // Release the latch once a selection is made
             }
 
@@ -207,7 +239,11 @@ class HomeActivity : AppCompatActivity() {
         }
 
         latch.await() // Wait for the dialog to complete
-        return resName
+        return resIdx
+    }
+
+    private fun getDaysList(options: Array<Pair<String, String>>): Array<String> {
+        return options.map { it.first }.toTypedArray()
     }
 
 }

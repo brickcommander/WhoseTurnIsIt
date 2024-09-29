@@ -38,7 +38,7 @@ class LoginActivity : AppCompatActivity() {
 
             btnLogin.setOnClickListener {
                 val pin = pinInput.text.toString()
-                if (pin.length == 4 && CONSTANTS.pinArray.contains(pin)) {
+                if ((pin.length == 4 || pin.length == 5) && CONSTANTS.pinArray.contains(pin)) {
                     username = CONSTANTS.pinToNameMap[pin].toString()
                     SharedData.username = username
                     SharedPreferencesHandler.update(username, this)

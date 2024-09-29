@@ -6,6 +6,7 @@ import com.brickcommander.whoseturnisit.data.CONSTANTS
 import com.brickcommander.whoseturnisit.model.Day
 import com.brickcommander.whoseturnisit.model.Person
 import com.brickcommander.whoseturnisit.model.Work
+import java.time.LocalDate
 
 class Calculate() {
 
@@ -83,6 +84,32 @@ class Calculate() {
         if (!handler.updateCacheWorkList(cacheWorkList))
             return "updateCacheWorkList API Failure"
 
+        return "Success"
+    }
+
+    private fun removeOldOrIdPendingItems(id: String = "default") {
+        Log.i(TAG, "removeOldOrIdPendingItems : id")
+        val cacheWorkList = handler.getCacheWorkList() ?: throw Exception("CacheWorkList is null")
+        val newCacheWorkList = mutableListOf<Work>()
+        var updated = false
+        cacheWorkList.forEach { work ->
+            if(work.getCreatedDate().isBefore(LocalDate.now().minusDays(2)) || work.getId() == id) {
+                Log.i(TAG, "Old Data Found : work=$work")
+                updated = true
+            } else {
+                newCacheWorkList.add(work)
+            }
+        }
+        if(updated) handler.updateCacheWorkList(newCacheWorkList)
+    }
+
+    fun removeOldPendingItems(): String {
+        removeOldOrIdPendingItems()
+        return "Success"
+    }
+
+    fun removePendingItem(id: String): String {
+        removeOldOrIdPendingItems(id)
         return "Success"
     }
 
@@ -185,14 +212,19 @@ class Calculate() {
     fun getPendingWork(): List<Work> {
         Log.i(TAG, "getPendingWork...")
         val cacheWorkList = handler.getCacheWorkList() ?: throw Exception("CacheWorkList is null")
+        Log.i(TAG, "getPendingWork : cacheWorkList=$cacheWorkList")
         return cacheWorkList
     }
 
-    fun getPendingWorkDays(): Array<String> {
-        Log.i(TAG, "getPendingWorkDays...")
+    fun getPendingWorkDaysIds(): Array<Pair<String, String>> {
+        Log.i(TAG, "getPendingWorkDaysIds...")
         val cacheWorkList = handler.getCacheWorkList() ?: throw Exception("CacheWorkList is null")
-        val pendingWorkDays = cacheWorkList.map { it.getDay().name }.toTypedArray()
-        return pendingWorkDays
+        Log.i(TAG, "getPendingWorkDaysIds : cacheWorkList=$cacheWorkList")
+        val pendingWorkDaysIds = cacheWorkList.map {
+            Log.i(TAG, "getPendingWorkDaysIds : " + it.getId() + " " + it.getDay())
+            Pair(it.getDay().name, it.getId())
+        }.toTypedArray()
+        return pendingWorkDaysIds
     }
 
     fun getHistory(): List<Work> {

@@ -43,12 +43,12 @@ class GitHubJsonHandler() {
             .header("Authorization", githubToken)
             .build()
 
-        Log.i(TAG, "calling Read API : ${filePath} : ${request.url}")
+        Log.i(TAG, "fetchJsonFromGitHub : calling Read API : ${filePath} : ${request.url}")
 
         try {
             val response = client.newCall(request).execute() // Synchronous call
             if (!response.isSuccessful) {
-                println("Failed to fetch JSON : ${filePath} : ${response.message}")
+                Log.i(TAG, "fetchJsonFromGitHub : Failed to fetch JSON : ${filePath} : ${response.message}")
                 return null
             }
 
@@ -60,7 +60,7 @@ class GitHubJsonHandler() {
             Log.i(TAG, "fetchJsonFromGitHub : ${filePath} : ${jsonContent}")
             return jsonContent
         } catch (e: IOException) {
-            Log.i(TAG, "fetchJsonFromGitHub: Exception Occured : REQ=${request} : FILEPATH=${filePath}")
+            Log.i(TAG, "fetchJsonFromGitHub : Exception Occured : REQ=${request} : FILEPATH=${filePath}")
             e.printStackTrace()
             return null
         }
@@ -75,12 +75,12 @@ class GitHubJsonHandler() {
             .header("Authorization", githubToken)
             .build()
 
-        Log.i(TAG, "calling Read API for SHA : ${filePath} : ${request.url}")
+        Log.i(TAG, "getFileSha : calling Read API for SHA : ${filePath} : ${request.url}")
 
         try {
             val response = client.newCall(request).execute() // Synchronous call
             if (!response.isSuccessful) {
-                Log.i(TAG,"Failed to fetch JSON : ${filePath}: ${response.message}")
+                Log.i(TAG,"getFileSha : Failed to fetch JSON : ${filePath}: ${response.message}")
                 return null
             }
 
@@ -88,7 +88,7 @@ class GitHubJsonHandler() {
             val fileInfo = gson.fromJson(responseBody, GitHubFileResponse::class.java)
             return fileInfo.sha  // Save the SHA
         } catch (e: IOException) {
-            Log.i(TAG, "getFileSha: Exception Occured : REQ=${request} : FILEPATH=${filePath}")
+            Log.i(TAG, "getFileSha : Exception Occured : REQ=${request} : FILEPATH=${filePath}")
             e.printStackTrace()
             return null
         }
@@ -99,7 +99,7 @@ class GitHubJsonHandler() {
         val encodedContent = Base64.encodeToString(updatedJson.toByteArray(), Base64.NO_WRAP)
 
         val sha = getFileSha(filePath) ?: run {
-            Log.i(TAG, "Get SHA API Failed : ${filePath}. Unable to update the JSON file.")
+            Log.i(TAG, "updateJsonOnGitHub : Get SHA API Failed : ${filePath}. Unable to update the JSON file.")
             return false
         }
 
@@ -126,10 +126,10 @@ class GitHubJsonHandler() {
         try {
             val response = client.newCall(request).execute() // Synchronous call
             if (response.isSuccessful) {
-                Log.i(TAG, "Successfully updated the JSON file on GitHub : ${filePath}.")
+                Log.i(TAG, "updateJsonOnGitHub : Successfully updated the JSON file on GitHub : ${filePath}.")
                 return true
             } else {
-                Log.i(TAG, "Failed to update the JSON file : ${filePath} : ${response.body?.string()}")
+                Log.i(TAG, "updateJsonOnGitHub : Failed to update the JSON file : ${filePath} : ${response.body?.string()}")
                 return false
             }
         } catch (e: IOException) {
