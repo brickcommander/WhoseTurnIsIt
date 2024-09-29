@@ -247,12 +247,17 @@ class HomeActivity : AppCompatActivity() {
                 latch.countDown() // Release the latch once a selection is made
             }
 
+            builder.setPositiveButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
+
             // Create and show the dialog
             val dialog = builder.create()
             dialog.show()
         }
 
         latch.await() // Wait for the dialog to complete
+        Log.i(TAG, "dialog Complete : resIdx=$resIdx")
         return resIdx
     }
 
