@@ -1,0 +1,13 @@
+secrets.properties file:
+GITHUB_TOKEN=token <db_github_repo_token>
+REPO_OWNER=<db_repo_owner_name>
+REPO_NAME=<db_repo_name>
+FILE_PERSONS_PATH=v2/PersonMaster.json
+FILE_WORK_PATH=v2/HistoryMaster.json
+FILE_CACHEWORK_PATH=v2/CacheWorkMaster.json
+FILE_EATLISTCACHE_PATH=EatListCache.json
+PASSWORD_PAWAN=<PIN_of_4_or_5_numerical_digits>
+PASSWORD_ANMOL=<PIN_of_4_or_5_numerical_digits>
+PASSWORD_YASHWANT=<PIN_of_4_or_5_numerical_digits>
+PASSWORD_SATYAM=<PIN_of_4_or_5_numerical_digits>
+PASSWORD_MASTER=<PIN_of_4_or_5_numerical_digits>
