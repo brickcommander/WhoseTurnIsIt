@@ -5,9 +5,7 @@ import java.time.LocalDate
 import android.util.Base64
 import android.util.Log
 import com.brickcommander.whoseturnisit.BuildConfig
-import com.brickcommander.whoseturnisit.data.SharedData
 import com.brickcommander.whoseturnisit.logic.Calculate
-import com.brickcommander.whoseturnisit.model.EatListCache
 import com.brickcommander.whoseturnisit.model.Person
 import com.brickcommander.whoseturnisit.model.Work
 import com.google.gson.reflect.TypeToken
@@ -19,10 +17,9 @@ class GitHubJsonHandler() {
     private val githubToken = BuildConfig.GITHUB_TOKEN
     private val repoOwner = BuildConfig.REPO_OWNER
     private val repoName = BuildConfig.REPO_NAME
-    private val filePersonsPath = BuildConfig.FILE_PERSONS_PATH
+    private val filePersonPath = BuildConfig.FILE_PERSONS_PATH
     private val fileWorkPath = BuildConfig.FILE_WORK_PATH
     private val fileCacheWorkPath = BuildConfig.FILE_CACHEWORK_PATH
-    private val fileEatListCacheWorkPath = BuildConfig.FILE_EATLISTCACHE_PATH
 
     private val client = OkHttpClient()
     private val gson = GsonBuilder()
@@ -46,12 +43,12 @@ class GitHubJsonHandler() {
             .header("Authorization", githubToken)
             .build()
 
-        Log.i(TAG, "calling Read API : ${filePath} : ${request.url}")
+        Log.i(TAG, "fetchJsonFromGitHub : calling Read API : ${filePath} : ${request.url}")
 
         try {
             val response = client.newCall(request).execute() // Synchronous call
             if (!response.isSuccessful) {
-                println("Failed to fetch JSON : ${filePath} : ${response.message}")
+                Log.i(TAG, "fetchJsonFromGitHub : Failed to fetch JSON : ${filePath} : ${response.message}")
                 return null
             }
 
@@ -59,47 +56,14 @@ class GitHubJsonHandler() {
             val fileInfo = gson.fromJson(responseBody, GitHubFileResponse::class.java)
             fileSha = fileInfo.sha  // Save the SHA
 
-            return String(Base64.decode(fileInfo.content, Base64.DEFAULT))
+            val jsonContent = String(Base64.decode(fileInfo.content, Base64.DEFAULT))
+            Log.i(TAG, "fetchJsonFromGitHub : ${filePath} : ${jsonContent}")
+            return jsonContent
         } catch (e: IOException) {
-            Log.i(TAG, "fetchJsonFromGitHub: Exception Occured : REQ=${request} : FILEPATH=${filePath}")
+            Log.i(TAG, "fetchJsonFromGitHub : Exception Occured : REQ=${request} : FILEPATH=${filePath}")
             e.printStackTrace()
             return null
         }
-    }
-
-    private fun fetchPersonsList(): Boolean {
-        val jsonContent = fetchJsonFromGitHub(filePersonsPath)?: return false
-        val objectType = object : TypeToken<List<Person>>() {}.type
-        SharedData.personsList = gson.fromJson(jsonContent, objectType)
-        return true
-    }
-
-    private fun fetchWorkList(): Boolean {
-        val jsonContent = fetchJsonFromGitHub(fileWorkPath)?: return false
-        val objectType = object : TypeToken<List<Work>>() {}.type
-        SharedData.workList = gson.fromJson(jsonContent, objectType)
-        return true
-    }
-
-    private fun fetchCacheWork(): Boolean {
-        val jsonContent = fetchJsonFromGitHub(fileCacheWorkPath)?: return false
-        val objectType = object : TypeToken<Work>() {}.type
-        SharedData.cacheWork = gson.fromJson(jsonContent, objectType)
-        return true
-    }
-
-    private fun fetchEatListCacheWork(): Boolean {
-        val jsonContent = fetchJsonFromGitHub(fileEatListCacheWorkPath)?: return false
-        val objectType = object : TypeToken<EatListCache>() {}.type
-        SharedData.eatListCache = gson.fromJson(jsonContent, objectType)
-        return true
-    }
-
-    fun fetchAllDataFromDB(): Boolean {
-        return fetchPersonsList()
-                && fetchWorkList()
-                && fetchCacheWork()
-                && fetchEatListCacheWork()
     }
 
     // Get File SHA
@@ -111,12 +75,12 @@ class GitHubJsonHandler() {
             .header("Authorization", githubToken)
             .build()
 
-        Log.i(TAG, "calling Read API for SHA : ${filePath} : ${request.url}")
+        Log.i(TAG, "getFileSha : calling Read API for SHA : ${filePath} : ${request.url}")
 
         try {
             val response = client.newCall(request).execute() // Synchronous call
             if (!response.isSuccessful) {
-                Log.i(TAG,"Failed to fetch JSON : ${filePath}: ${response.message}")
+                Log.i(TAG,"getFileSha : Failed to fetch JSON : ${filePath}: ${response.message}")
                 return null
             }
 
@@ -124,7 +88,7 @@ class GitHubJsonHandler() {
             val fileInfo = gson.fromJson(responseBody, GitHubFileResponse::class.java)
             return fileInfo.sha  // Save the SHA
         } catch (e: IOException) {
-            Log.i(TAG, "getFileSha: Exception Occured : REQ=${request} : FILEPATH=${filePath}")
+            Log.i(TAG, "getFileSha : Exception Occured : REQ=${request} : FILEPATH=${filePath}")
             e.printStackTrace()
             return null
         }
@@ -135,9 +99,11 @@ class GitHubJsonHandler() {
         val encodedContent = Base64.encodeToString(updatedJson.toByteArray(), Base64.NO_WRAP)
 
         val sha = getFileSha(filePath) ?: run {
-            Log.i(TAG, "Get SHA API Failed : ${filePath}. Unable to update the JSON file.")
+            Log.i(TAG, "updateJsonOnGitHub : Get SHA API Failed : ${filePath}. Unable to update the JSON file.")
             return false
         }
+
+        Log.i(TAG, "updateJsonOnGitHub : ${filePath} : ${updatedJson} : ${sha} : ${commitMessage}")
 
         val requestBody = """
             {
@@ -160,10 +126,10 @@ class GitHubJsonHandler() {
         try {
             val response = client.newCall(request).execute() // Synchronous call
             if (response.isSuccessful) {
-                Log.i(TAG, "Successfully updated the JSON file on GitHub : ${filePath}.")
+                Log.i(TAG, "updateJsonOnGitHub : Successfully updated the JSON file on GitHub : ${filePath}.")
                 return true
             } else {
-                Log.i(TAG, "Failed to update the JSON file : ${filePath} : ${response.body?.string()}")
+                Log.i(TAG, "updateJsonOnGitHub : Failed to update the JSON file : ${filePath} : ${response.body?.string()}")
                 return false
             }
         } catch (e: IOException) {
@@ -173,60 +139,75 @@ class GitHubJsonHandler() {
         }
     }
 
-    fun updatePersonsListInDB(newPersonsList: List<Person>): Boolean {
-        Log.i(Calculate.TAG, "updatePersonListInDB() : personsList = $newPersonsList")
-        val updatedJson = gson.toJson(newPersonsList)
-        if(updateJsonOnGitHub(updatedJson, filePersonsPath, "Update Persons List : ${LocalDateTime.now()}")) {
-            SharedData.personsList = newPersonsList
-            return true
+    fun getCacheWorkList(): MutableList<Work>? {
+        try {
+            Log.i(TAG, "getCacheWorkList")
+            val jsonContent = fetchJsonFromGitHub(fileCacheWorkPath)
+            val workListType = object : TypeToken<MutableList<Work>>() {}.type
+            return gson.fromJson(jsonContent, workListType)
+        } catch (e: Exception) {
+            Log.i(TAG, "Exception Occured : getCacheWorkList : ${e.message}")
+            return mutableListOf()
         }
-        return false
     }
 
-    fun updateWorkListInDB(cacheWork: Work): Boolean {
-        Log.i(Calculate.TAG, "updateWorkListInDB() : cacheWork = $cacheWork")
-        val newWorkList = SharedData.workList.toMutableList()
-        newWorkList.add(cacheWork)
-        val updatedJson = gson.toJson(newWorkList.toList())
-        if(updateJsonOnGitHub(updatedJson, fileWorkPath, "Update Work List : ${LocalDateTime.now()}")) {
-            SharedData.workList = newWorkList.toList()
-            SharedData.cacheWork = Work()
-            return true
+    fun updateCacheWorkList(cacheWorkList: MutableList<Work>): Boolean {
+        try {
+            Log.i(TAG, "updateCacheWorkList : cacheWorkList=$cacheWorkList")
+            val updatedJson = gson.toJson(cacheWorkList)
+            return updateJsonOnGitHub(updatedJson, fileCacheWorkPath, "Update CacheWork : ${LocalDateTime.now()}")
+        } catch (e: Exception) {
+            Log.i(TAG, "Exception Occured : updateCacheWorkList : ${e.message}")
+            return false
         }
-        return false
     }
 
-    fun updateEatListCacheInDB(name: String): Boolean {
-        Log.i(Calculate.TAG, "updateEatListCacheInDB() : name = $name")
-
-        val temp = SharedData.eatListCache
-
-        if(temp.currentDate.isBefore(LocalDateTime.now().toLocalDate())) {
-            temp.currentDate = LocalDateTime.now().toLocalDate()
-            temp.whoWillEat = mutableListOf("Anmol", "Yashwant", "Satyam", "Pawan")
+    fun getWorkHistory(): MutableList<Work>? {
+        try {
+            Log.i(TAG, "getWorkHistory")
+            val jsonContent = fetchJsonFromGitHub(fileWorkPath)
+            val workListType = object : TypeToken<MutableList<Work>>() {}.type
+            return gson.fromJson(jsonContent, workListType)
+        } catch (e: Exception) {
+            Log.i(TAG, "Exception Occured : getWorkHistory : ${e.message}")
+            return mutableListOf()
         }
-
-        if(temp.whoWillEat.contains(name)) {
-            temp.whoWillEat.remove(name)
-        }
-
-        val updatedJson = gson.toJson(temp)
-        if(updateJsonOnGitHub(updatedJson, fileEatListCacheWorkPath, "Update EatListCache : ${LocalDateTime.now()}")) {
-            SharedData.eatListCache = temp
-            return true
-        }
-        return false
     }
 
-    fun updateCacheWorkInDB(cacheWork: Work): Boolean {
-        Log.i(Calculate.TAG, "updateCacheWorkInDB()")
-        val updatedJson = gson.toJson(cacheWork)
-        if(updateJsonOnGitHub(updatedJson, fileCacheWorkPath, "Update CacheWork : ${LocalDateTime.now()}")) {
-            SharedData.cacheWork = cacheWork
-            return true
+    fun updateWorkHistory(history: MutableList<Work>): Boolean {
+        try {
+            Log.i(TAG, "updateWorkHistory : history=$history")
+            val updatedJson = gson.toJson(history)
+            return updateJsonOnGitHub(updatedJson, fileWorkPath, "Update History : ${LocalDateTime.now()}")
+        } catch (e: Exception) {
+            Log.i(TAG, "Exception Occured : updateWorkHistory : ${e.message}")
+            return false
         }
-        return false
     }
+
+    fun getPersonList(): MutableList<Person>? {
+        try {
+            Log.i(TAG, "getPersonList")
+            val jsonContent = fetchJsonFromGitHub(filePersonPath)
+            val personListType = object : TypeToken<MutableList<Person>>() {}.type
+            return gson.fromJson(jsonContent, personListType)
+        } catch (e: Exception) {
+            Log.i(TAG, "Exception Occured : getPersonList : ${e.message}")
+            return mutableListOf()
+        }
+    }
+
+    fun updatePersonList(personList: MutableList<Person>): Boolean {
+        try {
+            Log.i(TAG, "updatePersonList : personList=$personList")
+            val updatedJson = gson.toJson(personList)
+            return updateJsonOnGitHub(updatedJson, filePersonPath, "Update personList : ${LocalDateTime.now()}")
+        } catch (e: Exception) {
+            Log.i(TAG, "Exception Occured : updatePersonList : ${e.message}")
+            return false
+        }
+    }
+
 
     // Helper data class to store GitHub file metadata response
     private data class GitHubFileResponse(

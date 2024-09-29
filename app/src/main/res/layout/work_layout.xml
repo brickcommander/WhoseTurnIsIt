@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp"
+    android:layout_margin="10dp"
+    android:orientation="vertical"
+    android:background="@drawable/work_border">
+
+    <TextView
+        android:id="@+id/createdDateId"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Created Date"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/dayId"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Day"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/eatersListId"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Eaters"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/unableToWashId"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Unable To Wash"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/whoWashedId"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Who Washed"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/foodCookedId"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Food Cooked"
+        android:textSize="16sp" />
+
+<!--    <Button-->
+<!--        android:id="@+id/deleteItemButton"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="Remove" />-->
+
+</LinearLayout>

@@ -11,21 +11,21 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.brickcommander.whoseturnisit.R
 import com.brickcommander.whoseturnisit.logic.Calculate
-import com.brickcommander.whoseturnisit.model.Person
-import com.brickcommander.whoseturnisit.ui.PersonItemAdapter
+import com.brickcommander.whoseturnisit.model.Work
+import com.brickcommander.whoseturnisit.ui.WorkItemAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class StatusActivity : AppCompatActivity() {
+class HistoryActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: PersonItemAdapter
+    private lateinit var adapter: WorkItemAdapter
     private lateinit var textView: TextView
     private lateinit var progressBar: ProgressBar
-    private val items = mutableListOf<Person>()
+    private val items = mutableListOf<Work>()
 
     companion object {
-        const val TAG = "StatusActivity"
+        const val TAG = "HistoryActivity"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,31 +36,30 @@ class StatusActivity : AppCompatActivity() {
         progressBar = findViewById(R.id.progressBar)
         textView = findViewById(R.id.textView4)
 
-        adapter = PersonItemAdapter(items)
+        adapter = WorkItemAdapter(items)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
 
         lifecycleScope.launch(Dispatchers.IO) { // Use coroutines for background work
             progressBar.isVisible = true // Update UI on main thread
             val calculate = Calculate()
-            val personList = calculate.getPersonStatus()
-            Log.i(TAG, "personList=$personList")
+            val historyList = calculate.getHistory()
+            Log.i(TAG, "historyList=$historyList")
 
             withContext(Dispatchers.Main) { // Switch to main thread for UI updates
                 progressBar.isVisible = false
 
-                if(personList.isNotEmpty()) {
-                    personList.forEach { person ->
-                        adapter.addItem(person)
+                if(historyList.isNotEmpty()) {
+                    historyList.forEach { work ->
+                        adapter.addItem(work)
                         recyclerView.scrollToPosition(items.size - 1)
                     }
                 } else {
                     textView.isVisible = true
-                    textView.text = "Person List Not Available :("
+                    textView.text = "Empyt :("
                 }
             }
         }
     }
 
 }
-
