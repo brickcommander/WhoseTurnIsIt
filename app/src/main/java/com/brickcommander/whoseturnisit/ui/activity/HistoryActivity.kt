@@ -1,6 +1,7 @@
 package com.brickcommander.whoseturnisit.ui.activity
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -19,9 +20,13 @@ import kotlinx.coroutines.withContext
 class HistoryActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: WorkItemAdapter
-    private val items = mutableListOf<Work>()
-    private lateinit var progressBar: ProgressBar
     private lateinit var textView: TextView
+    private lateinit var progressBar: ProgressBar
+    private val items = mutableListOf<Work>()
+
+    companion object {
+        const val TAG = "HistoryActivity"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,7 +36,6 @@ class HistoryActivity : AppCompatActivity() {
         progressBar = findViewById(R.id.progressBar)
         textView = findViewById(R.id.textView4)
 
-        // Initialize adapter
         adapter = WorkItemAdapter(items)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
@@ -40,6 +44,7 @@ class HistoryActivity : AppCompatActivity() {
             progressBar.isVisible = true // Update UI on main thread
             val calculate = Calculate()
             val historyList = calculate.getHistory()
+            Log.i(TAG, "historyList=$historyList")
 
             withContext(Dispatchers.Main) { // Switch to main thread for UI updates
                 progressBar.isVisible = false
@@ -51,7 +56,7 @@ class HistoryActivity : AppCompatActivity() {
                     }
                 } else {
                     textView.isVisible = true
-                    textView.text = "No History"
+                    textView.text = "Empyt :("
                 }
             }
         }

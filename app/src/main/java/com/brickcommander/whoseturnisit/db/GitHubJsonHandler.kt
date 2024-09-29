@@ -140,42 +140,72 @@ class GitHubJsonHandler() {
     }
 
     fun getCacheWorkList(): MutableList<Work>? {
-        Log.i(TAG, "getCacheWorkList")
-        val jsonContent = fetchJsonFromGitHub(fileCacheWorkPath)?: return null
-        val workListType = object : TypeToken<MutableList<Work>>() {}.type
-        return gson.fromJson(jsonContent, workListType)
+        try {
+            Log.i(TAG, "getCacheWorkList")
+            val jsonContent = fetchJsonFromGitHub(fileCacheWorkPath)
+            val workListType = object : TypeToken<MutableList<Work>>() {}.type
+            return gson.fromJson(jsonContent, workListType)
+        } catch (e: Exception) {
+            Log.i(TAG, "Exception Occured : getCacheWorkList : ${e.message}")
+            return mutableListOf()
+        }
     }
 
     fun updateCacheWorkList(cacheWorkList: MutableList<Work>): Boolean {
-        Log.i(TAG, "updateCacheWorkList : cacheWorkList=$cacheWorkList")
-        val updatedJson = gson.toJson(cacheWorkList)
-        return updateJsonOnGitHub(updatedJson, fileCacheWorkPath, "Update CacheWork : ${LocalDateTime.now()}")
+        try {
+            Log.i(TAG, "updateCacheWorkList : cacheWorkList=$cacheWorkList")
+            val updatedJson = gson.toJson(cacheWorkList)
+            return updateJsonOnGitHub(updatedJson, fileCacheWorkPath, "Update CacheWork : ${LocalDateTime.now()}")
+        } catch (e: Exception) {
+            Log.i(TAG, "Exception Occured : updateCacheWorkList : ${e.message}")
+            return false
+        }
     }
 
     fun getWorkHistory(): MutableList<Work>? {
-        Log.i(TAG, "getWorkHistory")
-        val jsonContent = fetchJsonFromGitHub(fileWorkPath)?: return null
-        val workListType = object : TypeToken<MutableList<Work>>() {}.type
-        return gson.fromJson(jsonContent, workListType)
+        try {
+            Log.i(TAG, "getWorkHistory")
+            val jsonContent = fetchJsonFromGitHub(fileWorkPath)
+            val workListType = object : TypeToken<MutableList<Work>>() {}.type
+            return gson.fromJson(jsonContent, workListType)
+        } catch (e: Exception) {
+            Log.i(TAG, "Exception Occured : getWorkHistory : ${e.message}")
+            return mutableListOf()
+        }
     }
 
     fun updateWorkHistory(history: MutableList<Work>): Boolean {
-        Log.i(TAG, "updateWorkHistory : history=$history")
-        val updatedJson = gson.toJson(history)
-        return updateJsonOnGitHub(updatedJson, fileWorkPath, "Update History : ${LocalDateTime.now()}")
+        try {
+            Log.i(TAG, "updateWorkHistory : history=$history")
+            val updatedJson = gson.toJson(history)
+            return updateJsonOnGitHub(updatedJson, fileWorkPath, "Update History : ${LocalDateTime.now()}")
+        } catch (e: Exception) {
+            Log.i(TAG, "Exception Occured : updateWorkHistory : ${e.message}")
+            return false
+        }
     }
 
     fun getPersonList(): MutableList<Person>? {
-        Log.i(TAG, "getPersonList")
-        val jsonContent = fetchJsonFromGitHub(filePersonPath)?: return null
-        val personListType = object : TypeToken<MutableList<Person>>() {}.type
-        return gson.fromJson(jsonContent, personListType)
+        try {
+            Log.i(TAG, "getPersonList")
+            val jsonContent = fetchJsonFromGitHub(filePersonPath)
+            val personListType = object : TypeToken<MutableList<Person>>() {}.type
+            return gson.fromJson(jsonContent, personListType)
+        } catch (e: Exception) {
+            Log.i(TAG, "Exception Occured : getPersonList : ${e.message}")
+            return mutableListOf()
+        }
     }
 
     fun updatePersonList(personList: MutableList<Person>): Boolean {
-        Log.i(TAG, "updatePersonList : personList=$personList")
-        val updatedJson = gson.toJson(personList)
-        return updateJsonOnGitHub(updatedJson, filePersonPath, "Update personList : ${LocalDateTime.now()}")
+        try {
+            Log.i(TAG, "updatePersonList : personList=$personList")
+            val updatedJson = gson.toJson(personList)
+            return updateJsonOnGitHub(updatedJson, filePersonPath, "Update personList : ${LocalDateTime.now()}")
+        } catch (e: Exception) {
+            Log.i(TAG, "Exception Occured : updatePersonList : ${e.message}")
+            return false
+        }
     }
 
 

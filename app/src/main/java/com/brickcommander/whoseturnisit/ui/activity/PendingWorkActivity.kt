@@ -1,6 +1,7 @@
 package com.brickcommander.whoseturnisit.ui.activity
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -19,9 +20,13 @@ import kotlinx.coroutines.withContext
 class PendingWorkActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: WorkItemAdapter
-    private val items = mutableListOf<Work>()
-    private lateinit var progressBar: ProgressBar
     private lateinit var textView: TextView
+    private lateinit var progressBar: ProgressBar
+    private val items = mutableListOf<Work>()
+
+    companion object {
+        const val TAG = "PendingWorkActivity"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,17 +36,17 @@ class PendingWorkActivity : AppCompatActivity() {
         progressBar = findViewById(R.id.progressBar)
         textView = findViewById(R.id.textView4)
 
-        // Initialize adapter
         adapter = WorkItemAdapter(items)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
 
-        lifecycleScope.launch(Dispatchers.IO) { // Use coroutines for background work
-            progressBar.isVisible = true // Update UI on main thread
+        lifecycleScope.launch(Dispatchers.IO) {
+            progressBar.isVisible = true
             val calculate = Calculate()
             val historyList = calculate.getPendingWork()
+            Log.i(TAG, "historyList=$historyList")
 
-            withContext(Dispatchers.Main) { // Switch to main thread for UI updates
+            withContext(Dispatchers.Main) {
                 progressBar.isVisible = false
 
                 if(historyList.isNotEmpty()) {
@@ -51,7 +56,7 @@ class PendingWorkActivity : AppCompatActivity() {
                     }
                 } else {
                     textView.isVisible = true
-                    textView.text = "No Pending Work"
+                    textView.text = "No Pending Work :)"
                 }
             }
         }

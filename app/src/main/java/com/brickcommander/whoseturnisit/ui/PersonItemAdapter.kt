@@ -12,14 +12,14 @@ class PersonItemAdapter(private val items: MutableList<Person>) :
     RecyclerView.Adapter<PersonItemAdapter.ViewHolder>() {
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val name: TextView = itemView.findViewById(R.id.nameId)
-        val day: TextView = itemView.findViewById(R.id.dayId)
-        val score: TextView = itemView.findViewById(R.id.scoreId)
-        val lastWorkingDate: TextView = itemView.findViewById(R.id.lastWorkingDateId)
+        val name: TextView = itemView.findViewById(R.id.namePId)
+        val day: TextView = itemView.findViewById(R.id.dayPId)
+        val score: TextView = itemView.findViewById(R.id.scorePId)
+        val lastWorkingDate: TextView = itemView.findViewById(R.id.lastWorkingDatePId)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.work_layout, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.person_layout, parent, false)
         return ViewHolder(view)
     }
 

@@ -1,4 +1,4 @@
-package com.brickcommander.whoseturnisit
+package com.brickcommander.whoseturnisit.ui.activity
 
 import android.content.Context
 import android.content.Intent
@@ -11,9 +11,6 @@ import com.brickcommander.whoseturnisit.data.CONSTANTS
 import com.brickcommander.whoseturnisit.databinding.ActivityHomeBinding
 import com.brickcommander.whoseturnisit.logic.Calculate
 import com.brickcommander.whoseturnisit.model.Day
-import com.brickcommander.whoseturnisit.ui.activity.HistoryActivity
-import com.brickcommander.whoseturnisit.ui.activity.PendingWorkActivity
-import com.brickcommander.whoseturnisit.ui.activity.StatusActivity
 import java.time.DayOfWeek
 import java.time.LocalDateTime
 import java.util.concurrent.CountDownLatch

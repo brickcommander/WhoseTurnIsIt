@@ -8,7 +8,7 @@
     android:background="@drawable/work_border">
 
     <TextView
-        android:id="@+id/nameId"
+        android:id="@+id/namePId"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
@@ -16,7 +16,7 @@
         android:textSize="16sp" />
 
     <TextView
-        android:id="@+id/scoreId"
+        android:id="@+id/scorePId"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
@@ -24,7 +24,7 @@
         android:textSize="16sp" />
 
     <TextView
-        android:id="@+id/lastWorkingDateId"
+        android:id="@+id/lastWorkingDatePId"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
@@ -32,7 +32,7 @@
         android:textSize="16sp" />
 
     <TextView
-        android:id="@+id/dayId"
+        android:id="@+id/dayPId"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"

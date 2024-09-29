@@ -20,9 +20,9 @@ import kotlinx.coroutines.withContext
 class StatusActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: PersonItemAdapter
-    private val items = mutableListOf<Person>()
-    private lateinit var progressBar: ProgressBar
     private lateinit var textView: TextView
+    private lateinit var progressBar: ProgressBar
+    private val items = mutableListOf<Person>()
 
     companion object {
         const val TAG = "StatusActivity"
@@ -36,7 +36,6 @@ class StatusActivity : AppCompatActivity() {
         progressBar = findViewById(R.id.progressBar)
         textView = findViewById(R.id.textView4)
 
-        // Initialize adapter
         adapter = PersonItemAdapter(items)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
@@ -45,7 +44,7 @@ class StatusActivity : AppCompatActivity() {
             progressBar.isVisible = true // Update UI on main thread
             val calculate = Calculate()
             val personList = calculate.getPersonStatus()
-            Log.i(TAG, "renderStatusGrid : personList=$personList")
+            Log.i(TAG, "personList=$personList")
 
             withContext(Dispatchers.Main) { // Switch to main thread for UI updates
                 progressBar.isVisible = false
@@ -57,7 +56,7 @@ class StatusActivity : AppCompatActivity() {
                     }
                 } else {
                     textView.isVisible = true
-                    textView.text = "Person List Not Available"
+                    textView.text = "Person List Not Available :("
                 }
             }
         }
