@@ -1,13 +1,16 @@
-secrets.properties file:
-GITHUB_TOKEN=token <db_github_repo_token>
-REPO_OWNER=<db_repo_owner_name>
-REPO_NAME=<db_repo_name>
-FILE_PERSONS_PATH=v2/PersonMaster.json
-FILE_WORK_PATH=v2/HistoryMaster.json
-FILE_CACHEWORK_PATH=v2/CacheWorkMaster.json
-FILE_EATLISTCACHE_PATH=EatListCache.json
-PASSWORD_PAWAN=<PIN_of_4_or_5_numerical_digits>
-PASSWORD_ANMOL=<PIN_of_4_or_5_numerical_digits>
-PASSWORD_YASHWANT=<PIN_of_4_or_5_numerical_digits>
-PASSWORD_SATYAM=<PIN_of_4_or_5_numerical_digits>
-PASSWORD_MASTER=<PIN_of_4_or_5_numerical_digits>
+### Keep the below properties in secres.properties file at path app/src/main/res/
+
+| Property | Demo Value |
+|---|---|
+| `GITHUB_TOKEN` | `token` |
+| `REPO_OWNER` | `brickcommander` |
+| `REPO_NAME` | `Android-App` |
+| `FILE_PERSONS_PATH` | `v2/PersonMaster.json` |
+| `FILE_WORK_PATH` | `v2/HistoryMaster.json` |
+| `FILE_CACHEWORK_PATH` | `v2/CacheWorkMaster.json` |
+| `FILE_EATLISTCACHE_PATH` | `EatListCache.json` |
+| `PASSWORD_PAWAN` | `1111` |
+| `PASSWORD_ANMOL` | `2222` |
+| `PASSWORD_YASHWANT` | `3333` |
+| `PASSWORD_SATYAM` | `4444` |
+| `PASSWORD_MASTER` | `55555` |
