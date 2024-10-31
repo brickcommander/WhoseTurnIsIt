@@ -1,4 +1,4 @@
-### Keep the below properties in secres.properties file at path app/src/main/res/
+### Keep the below properties in secrets.properties file at path app/src/main/res/
 
 | Property | Demo Value |
 |---|---|
